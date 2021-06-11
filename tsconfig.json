@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"outFile": "./build/game.js",
+		"target": "es6",
+		"lib": [
+			"es6",
+			"dom"
+		],
+		"module": "system",
+		"noImplicitAny": true,
+		"sourceMap": true,
+	},
+	"include": [
+		"src/**/*.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}
