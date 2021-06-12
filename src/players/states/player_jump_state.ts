@@ -11,13 +11,15 @@ class PlayerJumpState extends PlayerAirborneState
 
     public enter():void {
         this.isHoldingJump = true;
+        this.machine.owner.speed.y -= PlayerStats.InitialJumpPower;
         //this.startJumpHeldDownFrames = this.machine.owner.currentInputState.jumpFrames;
     }
     public update():void {
-        this.machine.owner.updateMovementControls(120, 40);
+        //TODO: Change air accel?
+        this.machine.owner.updateMovementControls(PlayerStats.RunSpeed);
 
-        if (this.isHoldingJump && this.jumpHeldDownFrames > 0 && this.jumpHeldDownFrames < 7) {
-            this.machine.owner.speed.y -= 24;
+        if (this.isHoldingJump && this.jumpHeldDownFrames > 1 && this.jumpHeldDownFrames < 12) {
+            this.machine.owner.speed.y -= PlayerStats.JumpPower;
         }
         else if (this.machine.owner.currentInputState.jumpFrames == 0) {
             this.isHoldingJump = false;

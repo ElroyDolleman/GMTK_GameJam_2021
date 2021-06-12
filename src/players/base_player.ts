@@ -48,7 +48,7 @@ class BasePlayer extends Entity
         this.stateMachine.currentState.onCollisionSolved(result);
     }
 
-    updateMovementControls(maxRunSpeed: number = 120, runAcceleration: number = 20) {
+    updateMovementControls(maxRunSpeed: number = PlayerStats.RunSpeed, runAcceleration: number = PlayerStats.RunAcceleration) {
         if (this.currentInputState.leftFrames > 0) {
             if (this.speed.x > -maxRunSpeed) {
                 this.speed.x = Math.max(this.speed.x - runAcceleration, -maxRunSpeed);

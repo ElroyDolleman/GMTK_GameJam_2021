@@ -23,7 +23,7 @@ class PlayerAirborneState implements IBaseState<BasePlayer>
         }
     }
 
-    protected updateGravity(gravity: number = 20, maxFallSpeed: number = 260) {
+    protected updateGravity(gravity: number = PlayerStats.Gravity, maxFallSpeed: number = PlayerStats.MaxFallSpeed) {
         if (this.machine.owner.speed.y < maxFallSpeed) {
             this.machine.owner.speed.y = Math.min(this.machine.owner.speed.y + gravity, maxFallSpeed);
         }

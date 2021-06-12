@@ -578,7 +578,7 @@ class BasePlayer extends Entity {
     onCollisionSolved(result) {
         this.stateMachine.currentState.onCollisionSolved(result);
     }
-    updateMovementControls(maxRunSpeed = 120, runAcceleration = 20) {
+    updateMovementControls(maxRunSpeed = PlayerStats.RunSpeed, runAcceleration = PlayerStats.RunAcceleration) {
         if (this.currentInputState.leftFrames > 0) {
             if (this.speed.x > -maxRunSpeed) {
                 this.speed.x = Math.max(this.speed.x - runAcceleration, -maxRunSpeed);
@@ -637,6 +637,15 @@ class IcePlayer extends BasePlayer {
         super(scene, spawnPosition, inputFramesBehind, 'icechar-walk_00.png');
     }
 }
+var PlayerStats;
+(function (PlayerStats) {
+    PlayerStats.JumpPower = 16;
+    PlayerStats.InitialJumpPower = 198;
+    PlayerStats.RunAcceleration = 20;
+    PlayerStats.RunSpeed = 110;
+    PlayerStats.Gravity = 16;
+    PlayerStats.MaxFallSpeed = 240;
+})(PlayerStats || (PlayerStats = {}));
 class PlayerAirborneState {
     constructor() { }
     enter() {
@@ -653,7 +662,7 @@ class PlayerAirborneState {
             this.headbonk();
         }
     }
-    updateGravity(gravity = 20, maxFallSpeed = 260) {
+    updateGravity(gravity = PlayerStats.Gravity, maxFallSpeed = PlayerStats.MaxFallSpeed) {
         if (this.machine.owner.speed.y < maxFallSpeed) {
             this.machine.owner.speed.y = Math.min(this.machine.owner.speed.y + gravity, maxFallSpeed);
         }
@@ -689,7 +698,6 @@ class PlayerGroundedState {
     }
     update() {
         if (this.machine.owner.currentInputState.jumpFrames == 1) {
-            this.machine.owner.speed.y = -228;
             this.machine.changeState(PlayerStates.Jump);
         }
     }
@@ -722,11 +730,11 @@ class PlayerIdleState extends PlayerGroundedState {
     enter() {
     }
     update() {
-        super.update();
         this.machine.owner.updateMovementControls();
         if (this.machine.owner.speed.x != 0) {
             this.machine.changeState(PlayerStates.Walk);
         }
+        super.update();
     }
     leave() {
     }
@@ -739,12 +747,14 @@ class PlayerJumpState extends PlayerAirborneState {
     get jumpHeldDownFrames() { return this.machine.owner.currentInputState.jumpFrames /* - this.startJumpHeldDownFrames*/; }
     enter() {
         this.isHoldingJump = true;
+        this.machine.owner.speed.y -= PlayerStats.InitialJumpPower;
         //this.startJumpHeldDownFrames = this.machine.owner.currentInputState.jumpFrames;
     }
     update() {
-        this.machine.owner.updateMovementControls(120, 40);
-        if (this.isHoldingJump && this.jumpHeldDownFrames > 0 && this.jumpHeldDownFrames < 7) {
-            this.machine.owner.speed.y -= 24;
+        //TODO: Change air accel?
+        this.machine.owner.updateMovementControls(PlayerStats.RunSpeed);
+        if (this.isHoldingJump && this.jumpHeldDownFrames > 1 && this.jumpHeldDownFrames < 12) {
+            this.machine.owner.speed.y -= PlayerStats.JumpPower;
         }
         else if (this.machine.owner.currentInputState.jumpFrames == 0) {
             this.isHoldingJump = false;
@@ -767,11 +777,11 @@ class PlayerWalkState extends PlayerGroundedState {
     enter() {
     }
     update() {
-        super.update();
         this.machine.owner.updateMovementControls();
         if (this.machine.owner.speed.x == 0) {
             this.machine.changeState(PlayerStates.Idle);
         }
+        super.update();
     }
     leave() {
     }
