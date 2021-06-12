@@ -7,9 +7,14 @@ class PlayerGroundedState implements IBaseState<BasePlayer>
     public enter(): void {
         
     }
+
     public update(): void {
-        
+        if (this.machine.owner.currentInputState.jumpFrames == 1) {
+            this.machine.owner.speed.y = -228;
+            this.machine.changeState(PlayerStates.Jump);
+        }
     }
+
     public leave(): void {
         
     }

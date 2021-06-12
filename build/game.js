@@ -537,6 +537,7 @@ class PlayerFallState extends PlayerAirborneState {
     leave() {
     }
     onCollisionSolved(result) {
+        super.onCollisionSolved(result);
     }
 }
 class PlayerGroundedState {
@@ -544,6 +545,10 @@ class PlayerGroundedState {
     enter() {
     }
     update() {
+        if (this.machine.owner.currentInputState.jumpFrames == 1) {
+            this.machine.owner.speed.y = -228;
+            this.machine.changeState(PlayerStates.Jump);
+        }
     }
     leave() {
     }
@@ -587,13 +592,29 @@ class PlayerJumpState extends PlayerAirborneState {
     constructor() {
         super();
     }
+    //private startJumpHeldDownFrames:number;
+    get jumpHeldDownFrames() { return this.machine.owner.currentInputState.jumpFrames /* - this.startJumpHeldDownFrames*/; }
     enter() {
+        this.isHoldingJump = true;
+        //this.startJumpHeldDownFrames = this.machine.owner.currentInputState.jumpFrames;
     }
     update() {
+        this.machine.owner.updateMovementControls(120, 40);
+        if (this.isHoldingJump && this.jumpHeldDownFrames > 0 && this.jumpHeldDownFrames < 7) {
+            this.machine.owner.speed.y -= 24;
+        }
+        else if (this.machine.owner.currentInputState.jumpFrames == 0) {
+            this.isHoldingJump = false;
+        }
+        this.updateGravity();
+        if (this.machine.owner.speed.y >= 0) {
+            this.machine.changeState(PlayerStates.Fall);
+        }
     }
     leave() {
     }
     onCollisionSolved(result) {
+        super.onCollisionSolved(result);
     }
 }
 class PlayerWalkState extends PlayerGroundedState {
@@ -630,6 +651,7 @@ class StateMachine {
         this.states.set(key, state);
     }
     changeState(key) {
+        console.log("changeState", key);
         this.currentState.leave();
         this.currentStateKey = key;
         this.currentState.enter();

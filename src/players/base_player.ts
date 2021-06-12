@@ -12,7 +12,7 @@ class BasePlayer extends Entity
     protected stateMachine:StateMachine<BasePlayer>;
 
     private sprite:Phaser.GameObjects.Sprite;
-    private currentInputState: PlayerInputsState;
+    public currentInputState: PlayerInputsState;
     private inputFramesBehind:number;
 
     constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, inputFramesBehind:number, anim:string) {

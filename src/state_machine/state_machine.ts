@@ -26,6 +26,7 @@ class StateMachine<T>
     }
 
     public changeState(key:number) {
+        console.log("changeState", key);
         this.currentState.leave();
         this.currentStateKey = key;
         this.currentState.enter();
