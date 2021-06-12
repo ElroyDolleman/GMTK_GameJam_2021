@@ -33,10 +33,13 @@ class LevelLoader {
         let levelJson = this.jsonData[name];
         let tilesetJson = this.jsonData['tilesets_data'][levelJson['tileset_name']];
 
-        return new Level(
+        let level = new Level(
             this.scene,
             this.createTilemap(levelJson, tilesetJson),
         );
+        level.addEntity(new BasePlayer(this.scene, new Phaser.Math.Vector2(100, 100)));
+
+        return level;
     }
 
     private createTilemap(levelJson:any, tilesetJson:any) {
