@@ -8,7 +8,7 @@ class PlayerIdleState extends PlayerGroundedState
         
     }
     public update(): void {
-        
+        super.update();
     }
     public leave(): void {
         

@@ -1,17 +1,14 @@
 class PlayerGroundedState implements IBaseState<BasePlayer>
 {
-    public parent: BasePlayer;
     public machine: StateMachine<BasePlayer>;
 
-    constructor() {
-
-    }
+    constructor() {}
 
     public enter(): void {
         
     }
     public update(): void {
-        
+        this.machine.owner.updateMovementControls();
     }
     public leave(): void {
         

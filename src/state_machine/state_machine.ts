@@ -5,7 +5,10 @@ class StateMachine<T>
     private states:Map<number, IBaseState<T>>;
     private currentStateKey:number = -1;
 
-    constructor() {
+    public owner:T;
+
+    constructor(owner:T) {
+        this.owner = owner;
         this.states = new Map();
     }
 

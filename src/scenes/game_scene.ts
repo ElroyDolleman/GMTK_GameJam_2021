@@ -19,12 +19,15 @@ class GameScene extends Phaser.Scene
     }
 
     create() {
+        InputManager.instance.initialize(this);
         this.levelLoader.init();
 
         this.currentLevel = this.levelLoader.create("playground");
     }
 
     update() {
+        InputManager.instance.update();
+
         this.currentLevel.update();
     }
 

@@ -6,16 +6,17 @@ class GameScene extends Phaser.Scene {
         this.levelLoader = new LevelLoader(this);
     }
     preload() {
-        console.log("Hello World!");
         this.load.atlas('player_sheet', 'assets/player_sheet.png', 'assets/player_sheet.json');
         this.levelLoader.preloadLevelJson();
         this.levelLoader.preloadSpritesheets();
     }
     create() {
+        InputManager.instance.initialize(this);
         this.levelLoader.init();
         this.currentLevel = this.levelLoader.create("playground");
     }
     update() {
+        InputManager.instance.update();
         this.currentLevel.update();
     }
     draw() {
@@ -127,6 +128,83 @@ class Entity {
     }
 }
 class CollidableEntity {
+}
+class Input {
+    constructor(key) {
+        this.key = key;
+    }
+    get heldDownFrames() {
+        return this._heldDownFrames;
+    }
+    get isDown() {
+        return this._heldDownFrames > 0;
+    }
+    get justDown() {
+        return this._heldDownFrames == 1;
+    }
+    get justReleased() {
+        return this.prevHeldDownFrames > 0 && this._heldDownFrames == 0;
+    }
+    update() {
+        this.prevHeldDownFrames = this._heldDownFrames;
+        if (this.key.isDown) {
+            this._heldDownFrames++;
+        }
+        else {
+            this._heldDownFrames = 0;
+        }
+    }
+}
+class InputManager {
+    constructor() {
+        this.playerInputStates = [];
+        this.maxStoredInputs = 5 * 60 + 5;
+    }
+    get defaultPlayerInputsState() {
+        return {
+            leftFrames: 0,
+            rightFrames: 0,
+            jumpFrames: 0
+        };
+    }
+    static get instance() {
+        if (!InputManager._instance) {
+            InputManager._instance = new InputManager();
+        }
+        return InputManager._instance;
+    }
+    initialize(scene) {
+        this.left = new Input(scene.input.keyboard.addKey('left'));
+        this.right = new Input(scene.input.keyboard.addKey('right'));
+        this.jump = new Input(scene.input.keyboard.addKey('up'));
+        // setTimeout(() => {
+        //     console.log(this.playerInputStates);
+        //     debugger;
+        // }, 6000);
+    }
+    update() {
+        this.left.update();
+        this.right.update();
+        this.jump.update();
+        this.playerInputStates.push(this.createPlayerState());
+        if (this.playerInputStates.length > this.maxStoredInputs) {
+            this.playerInputStates.splice(0, 1);
+        }
+    }
+    getPlayerInputState(framesBehind = 0) {
+        let index = this.playerInputStates.length - 1 - framesBehind;
+        if (index < 0) {
+            return this.defaultPlayerInputsState;
+        }
+        return this.playerInputStates[index];
+    }
+    createPlayerState() {
+        return {
+            leftFrames: this.left.heldDownFrames,
+            rightFrames: this.right.heldDownFrames,
+            jumpFrames: this.jump.heldDownFrames
+        };
+    }
 }
 class Level {
     constructor(scene, map) {
@@ -357,25 +435,57 @@ class BasePlayer extends Entity {
         this.sprite.setOrigin(0.5, 1);
         this.sprite.x = spawnPosition.x;
         this.sprite.y = spawnPosition.y;
-        this.stateMachine = new StateMachine();
+        this.stateMachine = new StateMachine(this);
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
+        this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
         this.stateMachine.start(PlayerStates.Idle);
         this.speed.y = 150;
     }
     update() {
+        this.currentInputState = InputManager.instance.getPlayerInputState(0);
+        this.stateMachine.update();
     }
     lateUpdate() {
         this.sprite.setPosition(this.hitbox.centerX, this.hitbox.bottom);
     }
     onCollisionSolved(result) {
     }
+    updateMovementControls(maxRunSpeed = 120, runAcceleration = 20) {
+        if (this.currentInputState.leftFrames > 0) {
+            if (this.speed.x > -maxRunSpeed) {
+                this.speed.x = Math.max(this.speed.x - runAcceleration, -maxRunSpeed);
+            }
+            else if (this.speed.x < -maxRunSpeed) {
+                this.speed.x = Math.min(this.speed.x + runAcceleration, -maxRunSpeed);
+            }
+        }
+        else if (this.currentInputState.rightFrames > 0) {
+            if (this.speed.x < maxRunSpeed) {
+                this.speed.x = Math.min(this.speed.x + runAcceleration, maxRunSpeed);
+            }
+            else if (this.speed.x > maxRunSpeed) {
+                this.speed.x = Math.max(this.speed.x - runAcceleration, maxRunSpeed);
+            }
+        }
+        else {
+            this.decelerate(runAcceleration);
+        }
+    }
+    decelerate(deceleration) {
+        if (Math.abs(this.speed.x) < deceleration) {
+            this.speed.x = 0;
+        }
+        else {
+            this.speed.x -= deceleration * NumberUtil.sign(this.speed.x);
+        }
+    }
 }
 class PlayerGroundedState {
-    constructor() {
-    }
+    constructor() { }
     enter() {
     }
     update() {
+        this.machine.owner.updateMovementControls();
     }
     leave() {
     }
@@ -387,6 +497,7 @@ class PlayerIdleState extends PlayerGroundedState {
     enter() {
     }
     update() {
+        super.update();
     }
     leave() {
     }
@@ -398,13 +509,15 @@ class PlayerWalkState extends PlayerGroundedState {
     enter() {
     }
     update() {
+        super.update();
     }
     leave() {
     }
 }
 class StateMachine {
-    constructor() {
+    constructor(owner) {
         this.currentStateKey = -1;
+        this.owner = owner;
         this.states = new Map();
     }
     get currentState() { return this.states.get(this.currentStateKey); }
@@ -424,6 +537,16 @@ class StateMachine {
         this.currentState.enter();
     }
 }
+var NumberUtil;
+(function (NumberUtil) {
+    /**
+     * Returns an integer that indicates the sign of a number.
+     */
+    function sign(value) {
+        return value == 0 ? 0 : value > 0 ? 1 : -1;
+    }
+    NumberUtil.sign = sign;
+})(NumberUtil || (NumberUtil = {}));
 class TimeUtil {
     constructor() {
     }
