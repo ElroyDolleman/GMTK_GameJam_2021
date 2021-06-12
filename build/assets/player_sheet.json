@@ -4,13 +4,13 @@
 			"image": "player_sheet.png",
 			"format": "RGBA8888",
 			"size": {
-				"w": 48,
-				"h": 48
+				"w": 96,
+				"h": 96
 			},
 			"scale": 1,
 			"frames": [
 				{
-					"filename": "firechar-walk_00.png",
+					"filename": "firechar-falll_02.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -31,7 +31,7 @@
 					}
 				},
 				{
-					"filename": "firechar-walk_01.png",
+					"filename": "firechar-idle_00.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -52,7 +52,7 @@
 					}
 				},
 				{
-					"filename": "firechar-walk_02.png",
+					"filename": "firechar-idle_01.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -73,7 +73,70 @@
 					}
 				},
 				{
-					"filename": "firechar-walk_03.png",
+					"filename": "firechar-idle_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 0,
+						"y": 48,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "firechar-idle_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 0,
+						"y": 64,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "firechar-walk_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 0,
+						"y": 80,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "firechar-walk_01.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -94,7 +157,7 @@
 					}
 				},
 				{
-					"filename": "icechar-walk_00.png",
+					"filename": "firechar-walk_02.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -115,7 +178,7 @@
 					}
 				},
 				{
-					"filename": "icechar-walk_01.png",
+					"filename": "firechar-walk_03.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -136,7 +199,91 @@
 					}
 				},
 				{
-					"filename": "icechar-walk_02.png",
+					"filename": "icechar-fall_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 48,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "icechar-idle_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 60,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "icechar-idle_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 72,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "icechar-idle_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 84,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "icechar-idle_03.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -157,7 +304,7 @@
 					}
 				},
 				{
-					"filename": "icechar-walk_03.png",
+					"filename": "icechar-walk_00.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -176,6 +323,699 @@
 						"w": 12,
 						"h": 16
 					}
+				},
+				{
+					"filename": "icechar-walk_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 12,
+						"y": 48,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "icechar-walk_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 12,
+						"y": 64,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "icechar-walk_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 12,
+						"y": 80,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "firechar-falll_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 24,
+						"y": 16,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "firechar-falll_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 36,
+						"y": 16,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "firechar-falll_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 48,
+						"y": 16,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "firechar-jump_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 60,
+						"y": 16,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "firechar-jump_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 72,
+						"y": 16,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "firechar-jump_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 84,
+						"y": 16,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "firechar-jump_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 24,
+						"y": 31,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "icechar-fall_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 24,
+						"y": 46,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "icechar-fall_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 24,
+						"y": 61,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "icechar-fall_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 24,
+						"y": 76,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "icechar-jump_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 36,
+						"y": 31,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "icechar-jump_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 36,
+						"y": 46,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "icechar-jump_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 36,
+						"y": 61,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "icechar-jump_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 36,
+						"y": 76,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "firechar-crouch_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 48,
+						"y": 31,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "firechar-crouch_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 60,
+						"y": 31,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "firechar-sleep_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 72,
+						"y": 31,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "firechar-sleep_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 84,
+						"y": 31,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "icechar-crouch_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 48,
+						"y": 45,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "icechar-crouch_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 48,
+						"y": 59,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "icechar-sleep_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 48,
+						"y": 73,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "icechar-sleep_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 60,
+						"y": 45,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "firechar-crouch_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 72,
+						"y": 45,
+						"w": 12,
+						"h": 13
+					}
+				},
+				{
+					"filename": "firechar-crouch_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 84,
+						"y": 45,
+						"w": 12,
+						"h": 13
+					}
+				},
+				{
+					"filename": "firechar-sleep_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 72,
+						"y": 58,
+						"w": 12,
+						"h": 13
+					}
+				},
+				{
+					"filename": "firechar-sleep_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 60,
+						"y": 59,
+						"w": 12,
+						"h": 13
+					}
+				},
+				{
+					"filename": "icechar-crouch_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 84,
+						"y": 58,
+						"w": 12,
+						"h": 13
+					}
+				},
+				{
+					"filename": "icechar-crouch_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 60,
+						"y": 72,
+						"w": 12,
+						"h": 13
+					}
+				},
+				{
+					"filename": "icechar-sleep_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 72,
+						"y": 71,
+						"w": 12,
+						"h": 13
+					}
+				},
+				{
+					"filename": "icechar-sleep_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 84,
+						"y": 71,
+						"w": 12,
+						"h": 13
+					}
 				}
 			]
 		}
@@ -183,6 +1023,6 @@
 	"meta": {
 		"app": "https://www.codeandweb.com/texturepacker",
 		"version": "3.0",
-		"smartupdate": "$TexturePacker:SmartUpdate:b47afd4af7052dc3e21b194a5266db7f:e69b43e401080fb4d942e588fb631f55:f479e0c31071cb21388b705d67871d6a$"
+		"smartupdate": "$TexturePacker:SmartUpdate:fbea6cbcb578f4373614a70db39e6051:0d684fcf1ac2370f8e623a6afe96515d:f479e0c31071cb21388b705d67871d6a$"
 	}
 }
