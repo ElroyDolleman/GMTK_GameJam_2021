@@ -5,30 +5,39 @@ class TilesetManager {
     public static tilesetJson:any;
     public static tilesetName:string;
 
-    public static getTileTypeFromID(tileId:number):TileType {
+    public static getTileTypeFromID(tileId:number):TileTypes {
         if (tileId < 0) {
-            return TileType.Empty;
+            return TileTypes.Empty;
         }
 
         let tiletypes = this.tilesetJson['tiletypes'];
 
         if (tiletypes['solid'].indexOf(tileId) >= 0) {
-            return TileType.Solid;
+            return TileTypes.Solid;
+        }
+        if (tiletypes['semisolid'].indexOf(tileId) >= 0) {
+            return TileTypes.SemiSolid;
         }
         if (tiletypes['ice'].indexOf(tileId) >= 0) {
-            return TileType.Ice;
+            return TileTypes.Ice;
         }
         if (tiletypes['water'].indexOf(tileId) >= 0) {
-            return TileType.Water;
+            return TileTypes.Water;
         }
         if (tiletypes['grass'].indexOf(tileId) >= 0) {
-            return TileType.Grass;
+            return TileTypes.Grass;
         }
         if (tiletypes['fire'].indexOf(tileId) >= 0) {
-            return TileType.Fire;
+            return TileTypes.Fire;
+        }
+        if (tiletypes['torch'].indexOf(tileId) >= 0) {
+            return TileTypes.Torch;
+        }
+        if (tiletypes['goldtorch'].indexOf(tileId) >= 0) {
+            return TileTypes.GoldTorch;
         }
 
-        return TileType.Empty;
+        return TileTypes.Empty;
     }
 
     /**
@@ -63,7 +72,7 @@ class TilesetManager {
         TimeManager.tileAnimations.set(tile.id, tile.sprite.anims);
     }
 
-    public static changeTileType(tile:Tile, tileType:TileType) {
+    public static changeTileType(tile:Tile, tileType:TileTypes) {
         console.log("changeTileType", tileType, tile.tiletype);
         tile.tiletype = tileType;
 

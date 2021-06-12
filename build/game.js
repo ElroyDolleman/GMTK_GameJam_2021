@@ -64,6 +64,11 @@ class CollisionResult {
         this.onRight = false;
         this.onBottom = false;
         this.tiles = [];
+        this.prevTop = 0;
+        this.prevLeft = 0;
+        this.prevRight = 0;
+        this.prevBottom = 0;
+        this.isDamaged = false;
     }
 }
 class CollisionManager {
@@ -74,6 +79,10 @@ class CollisionManager {
         let result = new CollisionResult();
         let tiles = this.currentLevel.map.getTilesFromRect(collidable.nextHitbox, 2);
         result.tiles = tiles;
+        result.prevTop = collidable.hitbox.top;
+        result.prevLeft = collidable.hitbox.left;
+        result.prevRight = collidable.hitbox.right;
+        result.prevBottom = collidable.hitbox.bottom;
         collidable.moveX();
         for (let i = 0; i < tiles.length; i++) {
             if (!this.overlapsNonEmptyTile(tiles[i], collidable)) {
@@ -88,6 +97,12 @@ class CollisionManager {
             if (!this.overlapsNonEmptyTile(tiles[i], collidable)) {
                 continue;
             }
+            if (tiles[i].isSemisolid) {
+                if (this.isFallingThroughSemisolid(tiles[i], result.prevBottom, collidable.hitbox.bottom)) {
+                    result.onBottom = true;
+                    collidable.hitbox.y = tiles[i].hitbox.y - collidable.hitbox.height;
+                }
+            }
             else if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveVerticalCollision(tiles[i], collidable, result);
             }
@@ -96,7 +111,7 @@ class CollisionManager {
         return result;
     }
     overlapsNonEmptyTile(tile, collidable) {
-        return tile.tiletype != TileType.Empty && Phaser.Geom.Rectangle.Overlaps(tile.hitbox, collidable.hitbox);
+        return tile.tiletype != TileTypes.Empty && Phaser.Geom.Rectangle.Overlaps(tile.hitbox, collidable.hitbox);
     }
     solveHorizontalCollision(tile, collidable, result) {
         if (collidable.speed.x > 0) {
@@ -117,6 +132,9 @@ class CollisionManager {
             result.onTop = true;
             collidable.hitbox.y = tile.hitbox.bottom;
         }
+    }
+    isFallingThroughSemisolid(semisolidTile, prevBottom, currentBottom) {
+        return prevBottom <= semisolidTile.hitbox.top && currentBottom >= semisolidTile.hitbox.top;
     }
 }
 class CollisionUtil {
@@ -297,11 +315,13 @@ class LevelLoader {
         let tilesetJson = this.jsonData['tilesets_data'][levelJson['tileset_name']];
         TilesetManager.tilesetJson = tilesetJson;
         TilesetManager.tilesetName = levelJson['tileset_name'];
+        let iceSpawn = levelJson['ice_spawn'];
+        let fireSpawn = levelJson['fire_spawn'];
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
-        let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 160), 1 * 60);
+        let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(fireSpawn.x, fireSpawn.y + 16));
         level.addEntity(firePlayer);
         level.addCollidable(firePlayer);
-        let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(64, 160), 0);
+        let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(iceSpawn.x, iceSpawn.y + 16));
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
         return level;
@@ -404,20 +424,23 @@ class LevelLoader {
         return hitbox;
     }
 }
-var TileType;
-(function (TileType) {
-    TileType[TileType["Empty"] = 0] = "Empty";
-    TileType[TileType["Solid"] = 1] = "Solid";
-    TileType[TileType["Grass"] = 2] = "Grass";
-    TileType[TileType["Ice"] = 3] = "Ice";
-    TileType[TileType["Fire"] = 4] = "Fire";
-    TileType[TileType["Water"] = 5] = "Water";
-})(TileType || (TileType = {}));
+var TileTypes;
+(function (TileTypes) {
+    TileTypes[TileTypes["Empty"] = 0] = "Empty";
+    TileTypes[TileTypes["Solid"] = 1] = "Solid";
+    TileTypes[TileTypes["SemiSolid"] = 2] = "SemiSolid";
+    TileTypes[TileTypes["Grass"] = 3] = "Grass";
+    TileTypes[TileTypes["Ice"] = 4] = "Ice";
+    TileTypes[TileTypes["Fire"] = 5] = "Fire";
+    TileTypes[TileTypes["Water"] = 6] = "Water";
+    TileTypes[TileTypes["Torch"] = 7] = "Torch";
+    TileTypes[TileTypes["GoldTorch"] = 8] = "GoldTorch";
+})(TileTypes || (TileTypes = {}));
 const MappedTileTypes = new Map([
-    [TileType.Ice, 9],
-    [TileType.Grass, 23],
-    [TileType.Fire, 24],
-    [TileType.Water, 34],
+    [TileTypes.Ice, 9],
+    [TileTypes.Grass, 23],
+    [TileTypes.Fire, 25],
+    [TileTypes.Water, 36],
 ]);
 class Tile {
     //private debug:Phaser.GameObjects.Graphics;
@@ -439,10 +462,11 @@ class Tile {
         // }
     }
     get id() { return this.cellX.toString() + this.cellY.toString(); }
-    get isSolid() { return this.tiletype == TileType.Solid || this.tiletype == TileType.Ice; }
-    get canStandOn() { return this.isSolid; }
+    get isSemisolid() { return this.tiletype == TileTypes.SemiSolid || this.tiletype == TileTypes.Torch || this.tiletype == TileTypes.GoldTorch; }
+    get isSolid() { return this.tiletype == TileTypes.Solid || this.tiletype == TileTypes.Ice; }
+    get canStandOn() { return this.isSolid || this.isSemisolid; }
     makeEmpty() {
-        this.tiletype = TileType.Empty;
+        this.tiletype = TileTypes.Empty;
         this.sprite.destroy();
     }
     changeTileId(newTileId) {
@@ -519,25 +543,34 @@ class TilesetManager {
     constructor() { }
     static getTileTypeFromID(tileId) {
         if (tileId < 0) {
-            return TileType.Empty;
+            return TileTypes.Empty;
         }
         let tiletypes = this.tilesetJson['tiletypes'];
         if (tiletypes['solid'].indexOf(tileId) >= 0) {
-            return TileType.Solid;
+            return TileTypes.Solid;
+        }
+        if (tiletypes['semisolid'].indexOf(tileId) >= 0) {
+            return TileTypes.SemiSolid;
         }
         if (tiletypes['ice'].indexOf(tileId) >= 0) {
-            return TileType.Ice;
+            return TileTypes.Ice;
         }
         if (tiletypes['water'].indexOf(tileId) >= 0) {
-            return TileType.Water;
+            return TileTypes.Water;
         }
         if (tiletypes['grass'].indexOf(tileId) >= 0) {
-            return TileType.Grass;
+            return TileTypes.Grass;
         }
         if (tiletypes['fire'].indexOf(tileId) >= 0) {
-            return TileType.Fire;
+            return TileTypes.Fire;
         }
-        return TileType.Empty;
+        if (tiletypes['torch'].indexOf(tileId) >= 0) {
+            return TileTypes.Torch;
+        }
+        if (tiletypes['goldtorch'].indexOf(tileId) >= 0) {
+            return TileTypes.GoldTorch;
+        }
+        return TileTypes.Empty;
     }
     /**
      * Start a repeating tile animation
@@ -607,9 +640,8 @@ var PlayerStates;
     PlayerStates[PlayerStates["Jump"] = 3] = "Jump";
 })(PlayerStates || (PlayerStates = {}));
 class BasePlayer extends Entity {
-    constructor(scene, spawnPosition, inputFramesBehind, anim) {
+    constructor(scene, spawnPosition, anim) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
-        this.inputFramesBehind = inputFramesBehind;
         this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
         this.sprite.setOrigin(0.5, 1);
         this.sprite.x = spawnPosition.x;
@@ -662,19 +694,19 @@ class BasePlayer extends Entity {
     }
 }
 class FirePlayer extends BasePlayer {
-    constructor(scene, spawnPosition, inputFramesBehind) {
-        super(scene, spawnPosition, inputFramesBehind, 'firechar-walk_00.png');
+    constructor(scene, spawnPosition) {
+        super(scene, spawnPosition, 'firechar-walk_00.png');
     }
     onCollisionSolved(result) {
         super.onCollisionSolved(result);
         for (let i = 0; i < result.tiles.length; i++) {
-            if (result.tiles[i].tiletype == TileType.Ice) {
+            if (result.tiles[i].tiletype == TileTypes.Ice) {
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
                     if (!result.tiles[i].sprite.anims.isPlaying) {
                         console.log(Date.now());
                         TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
                             console.log(Date.now());
-                            if (result.tiles[i].originalTiletype == TileType.Ice) {
+                            if (result.tiles[i].originalTiletype == TileTypes.Ice) {
                                 result.tiles[i].makeEmpty();
                             }
                             else {
@@ -684,25 +716,25 @@ class FirePlayer extends BasePlayer {
                     }
                 }
             }
-            else if (result.tiles[i].tiletype == TileType.Grass) {
+            else if (result.tiles[i].tiletype == TileTypes.Grass) {
                 if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
-                    TilesetManager.changeTileType(result.tiles[i], TileType.Fire);
+                    TilesetManager.changeTileType(result.tiles[i], TileTypes.Fire);
                 }
             }
         }
     }
 }
 class IcePlayer extends BasePlayer {
-    constructor(scene, spawnPosition, inputFramesBehind) {
-        super(scene, spawnPosition, inputFramesBehind, 'icechar-walk_00.png');
-        this.solidTileTypes.push(TileType.Water);
+    constructor(scene, spawnPosition) {
+        super(scene, spawnPosition, 'icechar-walk_00.png');
+        this.solidTileTypes.push(TileTypes.Water);
     }
     onCollisionSolved(result) {
         super.onCollisionSolved(result);
         for (let i = 0; i < result.tiles.length; i++) {
-            if (result.tiles[i].tiletype == TileType.Water) {
+            if (result.tiles[i].tiletype == TileTypes.Water) {
                 if (CollisionUtil.hitboxVerticallyAligned(this.hitbox, result.tiles[i].hitbox)) {
-                    TilesetManager.changeTileType(result.tiles[i], TileType.Ice);
+                    TilesetManager.changeTileType(result.tiles[i], TileTypes.Ice);
                 }
             }
         }

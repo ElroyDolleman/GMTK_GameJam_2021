@@ -1,17 +1,20 @@
-enum TileType {
+enum TileTypes {
     Empty,
     Solid,
+    SemiSolid,
     Grass,
     Ice,
     Fire,
     Water,
+    Torch,
+    GoldTorch,
 }
 
 const MappedTileTypes = new Map<number, number>([
-    [TileType.Ice, 9],
-    [TileType.Grass, 23],
-    [TileType.Fire, 24],
-    [TileType.Water, 34],
+    [TileTypes.Ice, 9],
+    [TileTypes.Grass, 23],
+    [TileTypes.Fire, 25],
+    [TileTypes.Water, 36],
 ]);
 
 class Tile
@@ -25,15 +28,16 @@ class Tile
     public sprite:Phaser.GameObjects.Sprite;
     public hitbox:Phaser.Geom.Rectangle;
     public position:Phaser.Geom.Point;
-    public tiletype:TileType;
+    public tiletype:TileTypes;
     public tileId:number;
 
-    public get isSolid():boolean { return this.tiletype == TileType.Solid || this.tiletype == TileType.Ice; }
-    public get canStandOn():boolean { return this.isSolid; }
+    public get isSemisolid():boolean { return this.tiletype == TileTypes.SemiSolid || this.tiletype == TileTypes.Torch || this.tiletype == TileTypes.GoldTorch; }
+    public get isSolid():boolean { return this.tiletype == TileTypes.Solid || this.tiletype == TileTypes.Ice; }
+    public get canStandOn():boolean { return this.isSolid || this.isSemisolid; }
 
     //private debug:Phaser.GameObjects.Graphics;
 
-    constructor(sprite:Phaser.GameObjects.Sprite, tiletype:TileType, tileId:number, cellX:number, cellY:number, posX:number, posY:number, hitbox:Phaser.Geom.Rectangle) {
+    constructor(sprite:Phaser.GameObjects.Sprite, tiletype:TileTypes, tileId:number, cellX:number, cellY:number, posX:number, posY:number, hitbox:Phaser.Geom.Rectangle) {
         this.position = new Phaser.Geom.Point(posX, posY);
         this.cellX = cellX;
         this.cellY = cellY;
@@ -55,7 +59,7 @@ class Tile
     }
 
     public makeEmpty() {
-        this.tiletype = TileType.Empty;
+        this.tiletype = TileTypes.Empty;
         this.sprite.destroy();
     }
 

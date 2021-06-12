@@ -1,6 +1,6 @@
 interface ICollidable
 {
-    solidTileTypes:TileType[];
+    solidTileTypes:TileTypes[];
 
     hitbox:Phaser.Geom.Rectangle;
     nextHitbox:Phaser.Geom.Rectangle;

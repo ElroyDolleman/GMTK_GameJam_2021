@@ -1,7 +1,7 @@
 abstract class Entity implements ICollidable {
 
     public speed:Phaser.Math.Vector2;
-    public solidTileTypes:TileType[];
+    public solidTileTypes:TileTypes[];
 
     private _hitbox:Phaser.Geom.Rectangle;
     public get hitbox():Phaser.Geom.Rectangle {

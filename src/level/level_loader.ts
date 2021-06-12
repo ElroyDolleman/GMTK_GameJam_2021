@@ -36,16 +36,19 @@ class LevelLoader {
         TilesetManager.tilesetJson = tilesetJson;
         TilesetManager.tilesetName = levelJson['tileset_name'];
 
+        let iceSpawn = levelJson['ice_spawn'];
+        let fireSpawn = levelJson['fire_spawn'];
+
         let level = new Level(
             this.scene,
             this.createTilemap(levelJson, tilesetJson),
         );
 
-        let firePlayer:FirePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 160), 1*60);
+        let firePlayer:FirePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(fireSpawn.x, fireSpawn.y+16));
         level.addEntity(firePlayer);
         level.addCollidable(firePlayer);
 
-        let icePlayer:IcePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(64, 160), 0);
+        let icePlayer:IcePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(iceSpawn.x, iceSpawn.y+16));
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
 

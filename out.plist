@@ -9,13 +9,13 @@
                 <key>aliases</key>
                 <array/>
                 <key>spriteOffset</key>
-                <string>{-12,99}</string>
+                <string>{-3,99}</string>
                 <key>spriteSize</key>
-                <string>{224,50}</string>
+                <string>{242,50}</string>
                 <key>spriteSourceSize</key>
                 <string>{248,248}</string>
                 <key>textureRect</key>
-                <string>{{0,0},{224,50}}</string>
+                <string>{{0,0},{242,50}}</string>
                 <key>textureRotated</key>
                 <false/>
             </dict>
@@ -31,9 +31,9 @@
             <key>realTextureFileName</key>
             <string>tileset.png</string>
             <key>size</key>
-            <string>{224,224}</string>
+            <string>{242,242}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:f54a8835575e947601d260b64214bb3d:7be36ebf7405df8a8bc5693a6f111488:a0215f4d3fb45fa121a02d2da241ba16$</string>
+            <string>$TexturePacker:SmartUpdate:80711a52b664255db60235437df91269:f4fa497ff113425b583becf863282aa3:a0215f4d3fb45fa121a02d2da241ba16$</string>
             <key>textureFileName</key>
             <string>tileset.png</string>
         </dict>

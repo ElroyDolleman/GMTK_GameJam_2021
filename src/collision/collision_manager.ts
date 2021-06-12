@@ -4,6 +4,11 @@ class CollisionResult {
     onRight:boolean = false;
     onBottom:boolean = false;
     tiles:Tile[] = [];
+    prevTop:number = 0;
+    prevLeft:number = 0;
+    prevRight:number = 0;
+    prevBottom:number = 0;
+    isDamaged:boolean = false;
 }
 
 class CollisionManager {
@@ -18,6 +23,10 @@ class CollisionManager {
         let tiles = this.currentLevel.map.getTilesFromRect(collidable.nextHitbox, 2);
 
         result.tiles = tiles;
+        result.prevTop = collidable.hitbox.top;
+        result.prevLeft = collidable.hitbox.left;
+        result.prevRight = collidable.hitbox.right;
+        result.prevBottom = collidable.hitbox.bottom;
 
         collidable.moveX();
         for (let i = 0; i < tiles.length; i++) {
@@ -38,6 +47,13 @@ class CollisionManager {
                 continue;
             }
 
+            if (tiles[i].isSemisolid) {
+                if (this.isFallingThroughSemisolid(tiles[i], result.prevBottom, collidable.hitbox.bottom)) {
+                    result.onBottom = true;
+                    collidable.hitbox.y = tiles[i].hitbox.y - collidable.hitbox.height;
+                }
+            }
+
             else if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveVerticalCollision(tiles[i], collidable, result);
             }
@@ -48,7 +64,7 @@ class CollisionManager {
     }
 
     private overlapsNonEmptyTile(tile:Tile, collidable:ICollidable) {
-        return tile.tiletype != TileType.Empty && Phaser.Geom.Rectangle.Overlaps(tile.hitbox, collidable.hitbox);
+        return tile.tiletype != TileTypes.Empty && Phaser.Geom.Rectangle.Overlaps(tile.hitbox, collidable.hitbox);
     }
 
     private solveHorizontalCollision(tile:Tile, collidable:ICollidable, result:CollisionResult) {
@@ -71,5 +87,9 @@ class CollisionManager {
             result.onTop = true;
             collidable.hitbox.y = tile.hitbox.bottom;
         }
+    }
+
+    private isFallingThroughSemisolid(semisolidTile: Tile, prevBottom: number, currentBottom: number) {
+        return prevBottom <= semisolidTile.hitbox.top && currentBottom >= semisolidTile.hitbox.top;
     }
 }

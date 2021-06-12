@@ -17,9 +17,8 @@ class BasePlayer extends Entity
 
     private sprite:Phaser.GameObjects.Sprite;
 
-    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, inputFramesBehind:number, anim:string) {
+    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, anim:string) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
-        this.inputFramesBehind = inputFramesBehind;
 
         this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
         this.sprite.setOrigin(0.5, 1);
