@@ -280,10 +280,10 @@ class LevelLoader {
         TilesetManager.tilesetJson = tilesetJson;
         TilesetManager.tilesetName = levelJson['tileset_name'];
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
-        let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60);
+        let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 160), 1 * 60);
         level.addEntity(firePlayer);
         level.addCollidable(firePlayer);
-        let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 0);
+        let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(64, 160), 0);
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
         return level;
@@ -311,7 +311,7 @@ class LevelLoader {
             }
             let tileType = TilesetManager.getTileTypeFromID(tileId);
             let hitbox = new Phaser.Geom.Rectangle(posX, posY, TILE_WIDTH, TILE_HEIGHT);
-            tiles.push(new Tile(sprite, tileType, cellX, cellY, posX, posY, hitbox));
+            tiles.push(new Tile(sprite, tileType, tileId, cellX, cellY, posX, posY, hitbox));
         }
         return new Tilemap(tiles, gridCellsX, gridCellsY, TILE_WIDTH, TILE_HEIGHT);
     }
@@ -361,10 +361,11 @@ const MappedTileTypes = new Map([
 ]);
 class Tile {
     //private debug:Phaser.GameObjects.Graphics;
-    constructor(sprite, tiletype, cellX, cellY, posX, posY, hitbox) {
+    constructor(sprite, tiletype, tileId, cellX, cellY, posX, posY, hitbox) {
         this.position = new Phaser.Geom.Point(posX, posY);
         this.cellX = cellX;
         this.cellY = cellY;
+        this.tileId = tileId;
         this.tiletype = tiletype;
         this.hitbox = hitbox;
         this.sprite = sprite;
@@ -489,6 +490,16 @@ class TilesetManager {
         let tileId = MappedTileTypes.get(tileType);
         this.startTileAnimation(tile.sprite, tileId);
     }
+    static playAnimationOnTile(tile, frames, onDone) {
+        let key = 'tile';
+        tile.sprite.anims.create({
+            key: 'tile',
+            frames: tile.sprite.anims.generateFrameNumbers(this.tilesetName, { start: tile.tileId, end: tile.tileId + frames - 1 }),
+            frameRate: 10,
+        });
+        tile.sprite.play(key);
+        tile.sprite.on('animationcomplete', onDone);
+    }
 }
 /// <reference path="../entities/entity.ts"/>
 var PlayerStates;
@@ -556,16 +567,18 @@ class BasePlayer extends Entity {
 }
 class FirePlayer extends BasePlayer {
     constructor(scene, spawnPosition, inputFramesBehind) {
-        super(scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60, 'firechar-walk_00.png');
-        this.inputFramesBehind = inputFramesBehind;
+        super(scene, spawnPosition, inputFramesBehind, 'firechar-walk_00.png');
     }
     onCollisionSolved(result) {
         super.onCollisionSolved(result);
         for (let i = 0; i < result.tiles.length; i++) {
             if (result.tiles[i].tiletype == TileType.Ice) {
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
-                    //TODO: Melt slowly
-                    result.tiles[i].makeEmpty();
+                    if (!result.tiles[i].sprite.anims.isPlaying) {
+                        TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
+                            result.tiles[i].makeEmpty();
+                        });
+                    }
                 }
             }
             else if (result.tiles[i].tiletype == TileType.Grass) {
@@ -578,8 +591,7 @@ class FirePlayer extends BasePlayer {
 }
 class IcePlayer extends BasePlayer {
     constructor(scene, spawnPosition, inputFramesBehind) {
-        super(scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60, 'icechar-walk_00.png');
-        this.inputFramesBehind = inputFramesBehind;
+        super(scene, spawnPosition, inputFramesBehind, 'icechar-walk_00.png');
     }
 }
 class PlayerAirborneState {

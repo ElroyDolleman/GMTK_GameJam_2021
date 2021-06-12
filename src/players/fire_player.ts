@@ -1,8 +1,7 @@
 class FirePlayer extends BasePlayer
 {
     public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, inputFramesBehind:number) {
-        super(scene, new Phaser.Math.Vector2(64, 288-16), 1*60, 'firechar-walk_00.png');
-        this.inputFramesBehind = inputFramesBehind;
+        super(scene, spawnPosition, inputFramesBehind, 'firechar-walk_00.png');
     }
 
     onCollisionSolved(result: CollisionResult):void {
@@ -11,8 +10,12 @@ class FirePlayer extends BasePlayer
         for (let i = 0; i < result.tiles.length; i++) {
             if (result.tiles[i].tiletype == TileType.Ice) {
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
-                    //TODO: Melt slowly
-                    result.tiles[i].makeEmpty();
+
+                    if (!result.tiles[i].sprite.anims.isPlaying) {
+                        TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
+                            result.tiles[i].makeEmpty();
+                        });
+                    }
                 }
             }
             else if (result.tiles[i].tiletype == TileType.Grass) {

@@ -41,11 +41,11 @@ class LevelLoader {
             this.createTilemap(levelJson, tilesetJson),
         );
 
-        let firePlayer:FirePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 288-16), 1*60);
+        let firePlayer:FirePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 160), 1*60);
         level.addEntity(firePlayer);
         level.addCollidable(firePlayer);
 
-        let icePlayer:IcePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(64, 288-16), 0);
+        let icePlayer:IcePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(64, 160), 0);
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
 
@@ -84,7 +84,7 @@ class LevelLoader {
 
             let tileType = TilesetManager.getTileTypeFromID(tileId);
             let hitbox = new Phaser.Geom.Rectangle(posX, posY, TILE_WIDTH, TILE_HEIGHT);
-            tiles.push(new Tile(sprite, tileType, cellX, cellY, posX, posY, hitbox));
+            tiles.push(new Tile(sprite, tileType, tileId, cellX, cellY, posX, posY, hitbox));
         }
         return new Tilemap(tiles, gridCellsX, gridCellsY, TILE_WIDTH, TILE_HEIGHT);
     }

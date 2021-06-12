@@ -54,4 +54,16 @@ class TilesetManager {
         let tileId:number = MappedTileTypes.get(tileType);
         this.startTileAnimation(tile.sprite, tileId);
     }
+
+    public static playAnimationOnTile(tile:Tile, frames:number, onDone:Function) {
+
+        let key = 'tile';
+        tile.sprite.anims.create({
+            key: 'tile',
+            frames: tile.sprite.anims.generateFrameNumbers(this.tilesetName, { start: tile.tileId, end: tile.tileId + frames-1 }),
+            frameRate: 10,
+        });
+        tile.sprite.play(key);
+        tile.sprite.on('animationcomplete', onDone);
+    }
 }

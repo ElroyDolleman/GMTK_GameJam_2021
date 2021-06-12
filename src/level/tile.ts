@@ -23,17 +23,19 @@ class Tile
     public hitbox:Phaser.Geom.Rectangle;
     public position:Phaser.Geom.Point;
     public tiletype:TileType;
+    public tileId:number;
 
     public get isSolid():boolean { return this.tiletype == TileType.Solid || this.tiletype == TileType.Ice; }
     public get canStandOn():boolean { return this.isSolid; }
 
     //private debug:Phaser.GameObjects.Graphics;
 
-    constructor(sprite:Phaser.GameObjects.Sprite, tiletype:TileType, cellX:number, cellY:number, posX:number, posY:number, hitbox:Phaser.Geom.Rectangle) {
+    constructor(sprite:Phaser.GameObjects.Sprite, tiletype:TileType, tileId:number, cellX:number, cellY:number, posX:number, posY:number, hitbox:Phaser.Geom.Rectangle) {
         this.position = new Phaser.Geom.Point(posX, posY);
         this.cellX = cellX;
         this.cellY = cellY;
-        
+        this.tileId = tileId;
+
         this.tiletype = tiletype;
         this.hitbox = hitbox;
         this.sprite = sprite;
