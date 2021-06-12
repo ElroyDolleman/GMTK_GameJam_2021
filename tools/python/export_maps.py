@@ -35,8 +35,10 @@ for filename in os.listdir(directory):
         tileset_name = tileset_name.replace('tilesets/','')
         json_tilesets[tileset_name] = {}
         current = json_tilesets[tileset_name]
+
         tiletypes_obj = {}
         animations = {}
+        custom_hitboxes = {}
 
         for line in tileset_content.splitlines():
 
@@ -65,6 +67,19 @@ for filename in os.listdir(directory):
                 frames = result.group(1)
                 animations[tile_id] = int(frames)
 
+            elif 'hitbox' in line:
+                if not str(tile_id) in custom_hitboxes:
+                    custom_hitboxes[str(tile_id)] = {}
+                if '"hitbox_x"' in line:
+                    custom_hitboxes[str(tile_id)]['x'] = int(line.split('value="', 1)[1].replace('"/>', ''))
+                if '"hitbox_width"' in line:
+                    custom_hitboxes[str(tile_id)]['width'] = int(line.split('value="', 1)[1].replace('"/>', ''))
+                if '"hitbox_y"' in line:
+                    custom_hitboxes[str(tile_id)]['y'] = int(line.split('value="', 1)[1].replace('"/>', ''))
+                if '"hitbox_height"' in line:
+                    custom_hitboxes[str(tile_id)]['height'] = int(line.split('value="', 1)[1].replace('"/>', ''))
+
+        current['customHitboxes'] = custom_hitboxes
         current['tiletypes'] = tiletypes_obj
         current['animations'] = animations
     tileset_file.close()

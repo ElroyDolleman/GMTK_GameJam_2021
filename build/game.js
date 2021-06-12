@@ -310,7 +310,8 @@ class LevelLoader {
                 TilesetManager.startTileAnimation(sprite, tileId);
             }
             let tileType = TilesetManager.getTileTypeFromID(tileId);
-            let hitbox = new Phaser.Geom.Rectangle(posX, posY, TILE_WIDTH, TILE_HEIGHT);
+            let hitboxData = tilesetJson['customHitboxes'][tileId.toString()];
+            let hitbox = this.getTileHitbox(hitboxData, posX, posY, rotation);
             tiles.push(new Tile(sprite, tileType, tileId, cellX, cellY, posX, posY, hitbox));
         }
         return new Tilemap(tiles, gridCellsX, gridCellsY, TILE_WIDTH, TILE_HEIGHT);
@@ -342,6 +343,48 @@ class LevelLoader {
         }
         console.error("the tileId is stored as if it has been rotated/flipped, but the code does not recognize it");
         return 0;
+    }
+    getTileHitbox(hitboxData, posX, posY, rotation) {
+        let width = TILE_WIDTH;
+        let height = TILE_HEIGHT;
+        let hitbox = new Phaser.Geom.Rectangle(posX, posY, width, height);
+        if (!hitboxData)
+            return hitbox;
+        if (hitboxData['x'])
+            hitbox.x += hitboxData['x'];
+        if (hitboxData['y'])
+            hitbox.y += hitboxData['y'];
+        if (hitboxData['width'])
+            hitbox.width = hitboxData['width'];
+        if (hitboxData['height'])
+            hitbox.height = hitboxData['height'];
+        return this.rotateTileHitbox(hitbox, rotation);
+    }
+    rotateTileHitbox(hitbox, rotation) {
+        if (rotation == 0)
+            return hitbox;
+        let offsetY = TILE_HEIGHT - hitbox.height;
+        let degree = Phaser.Math.RadToDeg(rotation);
+        switch (degree) {
+            case -90:
+            case 270:
+                hitbox.x += offsetY;
+                hitbox.width = TILE_HEIGHT - offsetY;
+                hitbox.y -= offsetY;
+                hitbox.height = TILE_HEIGHT;
+                break;
+            case 90:
+            case -270:
+                hitbox.width = TILE_HEIGHT - offsetY;
+                hitbox.y -= offsetY;
+                hitbox.height = TILE_HEIGHT;
+                break;
+            case 180:
+            case -180:
+                hitbox.y -= offsetY;
+                break;
+        }
+        return hitbox;
     }
 }
 var TileType;
@@ -512,7 +555,7 @@ var PlayerStates;
 })(PlayerStates || (PlayerStates = {}));
 class BasePlayer extends Entity {
     constructor(scene, spawnPosition, inputFramesBehind, anim) {
-        super(new Phaser.Geom.Rectangle(spawnPosition.x, spawnPosition.y - 16, 16, 16));
+        super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
         this.inputFramesBehind = inputFramesBehind;
         this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
         this.sprite.setOrigin(0.5, 1);

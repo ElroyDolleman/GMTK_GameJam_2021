@@ -89,42 +89,74 @@
  <tile id="20">
   <properties>
    <property name="TileType" value="grass"/>
+   <property name="hitbox_height" value="6"/>
+   <property name="hitbox_width" value="14"/>
+   <property name="hitbox_x" value="1"/>
+   <property name="hitbox_y" value="10"/>
   </properties>
  </tile>
  <tile id="21">
   <properties>
    <property name="TileType" value="grass"/>
+   <property name="hitbox_height" value="6"/>
+   <property name="hitbox_width" value="14"/>
+   <property name="hitbox_x" value="1"/>
+   <property name="hitbox_y" value="10"/>
   </properties>
  </tile>
  <tile id="22">
   <properties>
    <property name="TileType" value="grass"/>
+   <property name="hitbox_height" value="6"/>
+   <property name="hitbox_width" value="14"/>
+   <property name="hitbox_x" value="1"/>
+   <property name="hitbox_y" value="10"/>
   </properties>
  </tile>
  <tile id="23">
   <properties>
    <property name="TileType" value="grass"/>
+   <property name="hitbox_height" value="6"/>
+   <property name="hitbox_width" value="14"/>
+   <property name="hitbox_x" value="1"/>
+   <property name="hitbox_y" value="10"/>
   </properties>
  </tile>
  <tile id="24">
   <properties>
    <property name="Animate" type="int" value="4"/>
    <property name="TileType" value="fire"/>
+   <property name="hitbox_height" type="int" value="12"/>
+   <property name="hitbox_width" type="int" value="8"/>
+   <property name="hitbox_x" type="int" value="4"/>
+   <property name="hitbox_y" type="int" value="4"/>
   </properties>
  </tile>
  <tile id="25">
   <properties>
    <property name="TileType" value="fire"/>
+   <property name="hitbox_height" type="int" value="12"/>
+   <property name="hitbox_width" type="int" value="8"/>
+   <property name="hitbox_x" type="int" value="4"/>
+   <property name="hitbox_y" type="int" value="4"/>
   </properties>
  </tile>
  <tile id="26">
   <properties>
    <property name="TileType" value="fire"/>
+   <property name="hitbox_height" type="int" value="12"/>
+   <property name="hitbox_width" type="int" value="8"/>
+   <property name="hitbox_x" type="int" value="4"/>
+   <property name="hitbox_y" type="int" value="4"/>
   </properties>
  </tile>
  <tile id="27">
   <properties>
    <property name="TileType" value="fire"/>
+   <property name="hitbox_height" type="int" value="12"/>
+   <property name="hitbox_width" type="int" value="8"/>
+   <property name="hitbox_x" type="int" value="4"/>
+   <property name="hitbox_y" type="int" value="4"/>
   </properties>
  </tile>
  <tile id="28">
