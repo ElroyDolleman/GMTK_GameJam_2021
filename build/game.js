@@ -16,6 +16,7 @@ class GameScene extends Phaser.Scene {
         this.currentLevel = this.levelLoader.create("playground");
     }
     update() {
+        this.currentLevel.update();
     }
     draw() {
     }
@@ -36,14 +37,80 @@ var config = {
     scene: [GameScene],
 };
 var game = new Phaser.Game(config);
+class CollisionResult {
+    constructor() {
+        this.onTop = false;
+        this.onLeft = false;
+        this.onRight = false;
+        this.onBottom = false;
+        this.tiles = [];
+    }
+}
+class CollisionManager {
+    constructor(level) {
+        this.currentLevel = level;
+    }
+    moveCollidable(collidable) {
+        let result = new CollisionResult();
+        let tiles = this.currentLevel.map.getTilesFromRect(collidable.nextHitbox, 2);
+        result.tiles = tiles;
+        collidable.moveX();
+        for (let i = 0; i < tiles.length; i++) {
+            if (!this.overlapsNonEmptyTile(tiles[i], collidable)) {
+                continue;
+            }
+            if (tiles[i].isSolid) {
+                this.solveHorizontalCollision(tiles[i], collidable, result);
+            }
+        }
+        collidable.moveY();
+        for (let i = 0; i < tiles.length; i++) {
+            if (!this.overlapsNonEmptyTile(tiles[i], collidable)) {
+                continue;
+            }
+            else if (tiles[i].isSolid) {
+                this.solveVerticalCollision(tiles[i], collidable, result);
+            }
+        }
+        collidable.onCollisionSolved(result);
+        return result;
+    }
+    overlapsNonEmptyTile(tile, collidable) {
+        return tile.tiletype != TileType.Empty && Phaser.Geom.Rectangle.Overlaps(tile.hitbox, collidable.hitbox);
+    }
+    solveHorizontalCollision(tile, collidable, result) {
+        if (collidable.speed.x > 0) {
+            result.onRight = true;
+            collidable.hitbox.x = tile.hitbox.x - collidable.hitbox.width;
+        }
+        else if (collidable.speed.x < 0) {
+            result.onLeft = true;
+            collidable.hitbox.x = tile.hitbox.right;
+        }
+    }
+    solveVerticalCollision(tile, collidable, result) {
+        if (collidable.speed.y > 0) {
+            result.onBottom = true;
+            collidable.hitbox.y = tile.hitbox.y - collidable.hitbox.height;
+        }
+        else if (collidable.speed.y < 0) {
+            result.onTop = true;
+            collidable.hitbox.y = tile.hitbox.bottom;
+        }
+    }
+}
 let TILE_WIDTH = 16;
 let TILE_HEIGHT = 16;
 class Entity {
     constructor(hitbox) {
         this._hitbox = hitbox;
+        this.speed = new Phaser.Math.Vector2();
     }
     get hitbox() {
         return this._hitbox;
+    }
+    get nextHitbox() {
+        return new Phaser.Geom.Rectangle(this.x + this.speed.x * TimeUtil.getElapsed(), this.y + this.speed.y * TimeUtil.getElapsed(), this.hitbox.width, this.hitbox.height);
     }
     get x() { return this._hitbox.x; }
     get y() { return this._hitbox.y; }
@@ -52,17 +119,36 @@ class Entity {
     get position() {
         return new Phaser.Math.Vector2(this.hitbox.x, this.hitbox.y);
     }
+    moveX() {
+        this._hitbox.x += this.speed.x * TimeUtil.getElapsed();
+    }
+    moveY() {
+        this._hitbox.y += this.speed.y * TimeUtil.getElapsed();
+    }
+}
+class CollidableEntity {
 }
 class Level {
     constructor(scene, map) {
         this.entities = [];
+        this.collidables = [];
         this.map = map;
         this.scene = scene;
+        this.collisionManager = new CollisionManager(this);
     }
     update() {
         for (let i = 0; i < this.entities.length; i++) {
             this.entities[i].update();
         }
+        for (let i = 0; i < this.collidables.length; i++) {
+            this.collisionManager.moveCollidable(this.collidables[i]);
+        }
+        for (let i = 0; i < this.entities.length; i++) {
+            this.entities[i].lateUpdate();
+        }
+    }
+    addCollidable(collidable) {
+        this.collidables.push(collidable);
     }
     addEntity(entity) {
         this.entities.push(entity);
@@ -97,7 +183,9 @@ class LevelLoader {
         let levelJson = this.jsonData[name];
         let tilesetJson = this.jsonData['tilesets_data'][levelJson['tileset_name']];
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
-        level.addEntity(new BasePlayer(this.scene, new Phaser.Math.Vector2(100, 100)));
+        let player = new BasePlayer(this.scene, new Phaser.Math.Vector2(100, 100));
+        level.addEntity(player);
+        level.addCollidable(player);
         return level;
     }
     createTilemap(levelJson, tilesetJson) {
@@ -255,9 +343,9 @@ class Tilemap {
         }
     }
 }
-/// <reference path="../entities/actor.ts"/>
+/// <reference path="../entities/entity.ts"/>
 var PlayerStates;
-/// <reference path="../entities/actor.ts"/>
+/// <reference path="../entities/entity.ts"/>
 (function (PlayerStates) {
     PlayerStates[PlayerStates["Idle"] = 0] = "Idle";
     PlayerStates[PlayerStates["Walk"] = 1] = "Walk";
@@ -272,8 +360,14 @@ class BasePlayer extends Entity {
         this.stateMachine = new StateMachine();
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
         this.stateMachine.start(PlayerStates.Idle);
+        this.speed.y = 150;
     }
     update() {
+    }
+    lateUpdate() {
+        this.sprite.setPosition(this.hitbox.centerX, this.hitbox.bottom);
+    }
+    onCollisionSolved(result) {
     }
 }
 class PlayerGroundedState {
@@ -330,4 +424,15 @@ class StateMachine {
         this.currentState.enter();
     }
 }
+class TimeUtil {
+    constructor() {
+    }
+    static getElapsed() {
+        return this.currentElapsedMS / 1000;
+    }
+    static getElapsedMS() {
+        return this.currentElapsedMS;
+    }
+}
+TimeUtil.currentElapsedMS = (1 / 60) * 1000;
 //# sourceMappingURL=game.js.map

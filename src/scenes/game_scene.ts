@@ -12,7 +12,6 @@ class GameScene extends Phaser.Scene
     }
 
     preload() {
-        console.log("Hello World!");
         this.load.atlas('player_sheet', 'assets/player_sheet.png', 'assets/player_sheet.json');
 
         this.levelLoader.preloadLevelJson();
@@ -26,7 +25,7 @@ class GameScene extends Phaser.Scene
     }
 
     update() {
-
+        this.currentLevel.update();
     }
 
     draw() {

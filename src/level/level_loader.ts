@@ -37,7 +37,10 @@ class LevelLoader {
             this.scene,
             this.createTilemap(levelJson, tilesetJson),
         );
-        level.addEntity(new BasePlayer(this.scene, new Phaser.Math.Vector2(100, 100)));
+
+        let player:BasePlayer = new BasePlayer(this.scene, new Phaser.Math.Vector2(100, 100));
+        level.addEntity(player);
+        level.addCollidable(player);
 
         return level;
     }

@@ -1,4 +1,4 @@
-/// <reference path="../entities/actor.ts"/>
+/// <reference path="../entities/entity.ts"/>
 
 enum PlayerStates {
     Idle,
@@ -23,9 +23,19 @@ class BasePlayer extends Entity
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
 
         this.stateMachine.start(PlayerStates.Idle);
+
+        this.speed.y = 150;
     }
 
     update():void {
+
+    }
+
+    lateUpdate():void {
+        this.sprite.setPosition(this.hitbox.centerX, this.hitbox.bottom);
+    }
+
+    onCollisionSolved(result: CollisionResult):void {
 
     }
 }
