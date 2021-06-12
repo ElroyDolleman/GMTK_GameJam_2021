@@ -108,6 +108,7 @@
  </tile>
  <tile id="24">
   <properties>
+   <property name="Animate" type="int" value="4"/>
    <property name="TileType" value="fire"/>
   </properties>
  </tile>
@@ -158,6 +159,7 @@
  </tile>
  <tile id="34">
   <properties>
+   <property name="Animate" type="int" value="4"/>
    <property name="TileType" value="water"/>
   </properties>
  </tile>

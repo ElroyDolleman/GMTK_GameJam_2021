@@ -302,7 +302,22 @@ class LevelLoader {
             let cellY = Math.floor(i / gridCellsX);
             let posX = cellX * TILE_WIDTH;
             let posY = cellY * TILE_HEIGHT;
-            let sprite = this.makeSprite(tileId, posX, posY, rotation, levelJson['tileset_name']);
+            let sprite = null;
+            if (tileId >= 0) {
+                sprite = this.makeSprite(tileId, posX, posY, rotation, levelJson['tileset_name']);
+                // Create animation if there are any
+                if (tilesetJson['animations'][tileId] != undefined) {
+                    let amountOfFrames = tilesetJson['animations'][tileId];
+                    let key = 'tile';
+                    sprite.anims.create({
+                        key: 'tile',
+                        frames: sprite.anims.generateFrameNumbers(levelJson['tileset_name'], { start: tileId, end: tileId + amountOfFrames - 1 }),
+                        frameRate: 10,
+                        repeat: -1
+                    });
+                    sprite.play(key);
+                }
+            }
             let tileType = this.getTileType(tilesetJson, tileId);
             let hitbox = new Phaser.Geom.Rectangle(posX, posY, TILE_WIDTH, TILE_HEIGHT);
             tiles.push(new Tile(sprite, tileType, cellX, cellY, posX, posY, hitbox));
@@ -316,9 +331,6 @@ class LevelLoader {
         };
     }
     makeSprite(tileId, posX, posY, rotation, tilesetName) {
-        if (tileId < 0) {
-            return null;
-        }
         let sprite = this.scene.add.sprite(posX + TILE_WIDTH / 2, posY + TILE_WIDTH / 2, tilesetName, tileId);
         sprite.setOrigin(0.5, 0.5);
         sprite.setRotation(rotation);
@@ -702,7 +714,6 @@ class StateMachine {
         this.states.set(key, state);
     }
     changeState(key) {
-        console.log("changeState", key);
         this.currentState.leave();
         this.currentStateKey = key;
         this.currentState.enter();

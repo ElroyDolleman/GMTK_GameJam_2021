@@ -36,6 +36,7 @@ for filename in os.listdir(directory):
         json_tilesets[tileset_name] = {}
         current = json_tilesets[tileset_name]
         tiletypes_obj = {}
+        animations = {}
 
         for line in tileset_content.splitlines():
 
@@ -59,7 +60,13 @@ for filename in os.listdir(directory):
                         tiletypes_obj[tiletype] = []
                     tiletypes_obj[tiletype].append(tile_id)
 
+            elif '"Animate"' in line:
+                result = re.search('value="(.*)"/>', line)
+                frames = result.group(1)
+                animations[tile_id] = int(frames)
+
         current['tiletypes'] = tiletypes_obj
+        current['animations'] = animations
     tileset_file.close()
 
     # Store the tiles data
