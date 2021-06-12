@@ -27,7 +27,15 @@
 </data>
  </layer>
  <objectgroup id="2" name="Object Layer 1">
-  <object id="1" name="ice" x="64" y="112" width="16" height="16"/>
-  <object id="2" name="fire" x="32" y="112" width="16" height="16"/>
+  <object id="1" name="ice" x="64" y="112" width="16" height="16">
+   <properties>
+    <property name="sleep" type="bool" value="false"/>
+   </properties>
+  </object>
+  <object id="2" name="fire" x="32" y="112" width="16" height="16">
+   <properties>
+    <property name="sleep" type="bool" value="true"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

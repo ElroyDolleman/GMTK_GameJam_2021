@@ -92,10 +92,18 @@ for filename in os.listdir(directory):
     # Objects
     objects = json_content['layers'][1]['objects']
     for obj in objects:
+        
         if obj['name'] == 'fire':
             json_level['fire_spawn'] = { 'x':obj['x'], 'y':obj['y'] }
+            for prop in obj['properties']:
+                if prop['name'] == 'sleep':
+                    json_level['fire_spawn']['sleep'] = prop['value']
+
         if obj['name'] == 'ice':
             json_level['ice_spawn'] = { 'x':obj['x'], 'y':obj['y'] }
+            for prop in obj['properties']:
+                if prop['name'] == 'sleep':
+                    json_level['ice_spawn']['sleep'] = prop['value']
 
     # Create the levels json
     json_level['gridCellsX'] = json_content['width']

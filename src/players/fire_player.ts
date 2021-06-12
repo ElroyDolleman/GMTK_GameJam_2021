@@ -1,7 +1,7 @@
 class FirePlayer extends BasePlayer
 {
-    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2) {
-        super(scene, spawnPosition, 'firechar-walk_00.png');
+    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates) {
+        super(scene, spawnPosition, startingState, 'firechar-walk_00.png');
     }
 
     onCollisionSolved(result: CollisionResult):void {
@@ -12,9 +12,8 @@ class FirePlayer extends BasePlayer
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
 
                     if (!result.tiles[i].sprite.anims.isPlaying) {
-                        console.log(Date.now());
                         TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
-                            console.log(Date.now());
+
                             if (result.tiles[i].originalTiletype == TileTypes.Ice) {
                                 result.tiles[i].makeEmpty();
                             }

@@ -73,7 +73,6 @@ class TilesetManager {
     }
 
     public static changeTileType(tile:Tile, tileType:TileTypes) {
-        console.log("changeTileType", tileType, tile.tiletype);
         tile.tiletype = tileType;
 
         let tileId:number = MappedTileTypes.get(tileType);
@@ -89,8 +88,6 @@ class TilesetManager {
      * @returns 
      */
     public static playAnimationOnTile(tile:Tile, frames:number, onDone:Function) {
-
-        console.log("playAnimationOnTile", tile.tileId, frames, tile.tileId + frames-1);
 
         if (tile.sprite.anims.isPlaying) {
             tile.sprite.stop();

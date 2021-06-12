@@ -4,12 +4,14 @@ enum PlayerStates {
     Idle,
     Walk,
     Fall,
-    Jump
+    Jump,
+    Crouch,
+    Sleep
 }
 
 class BasePlayer extends Entity
 {
-    public currentInputState: PlayerInputsState;
+    public currentInputState:PlayerInputsState;
 
     protected stateMachine:StateMachine<BasePlayer>;
 
@@ -17,7 +19,7 @@ class BasePlayer extends Entity
 
     private sprite:Phaser.GameObjects.Sprite;
 
-    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, anim:string) {
+    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates, anim:string) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
 
         this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
@@ -30,13 +32,22 @@ class BasePlayer extends Entity
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
         this.stateMachine.addState(PlayerStates.Fall, new PlayerFallState());
         this.stateMachine.addState(PlayerStates.Jump, new PlayerJumpState());
+        this.stateMachine.addState(PlayerStates.Crouch, new PlayerCrouchState());
+        this.stateMachine.addState(PlayerStates.Sleep, new PlayerSleepState());
 
-        this.stateMachine.start(PlayerStates.Idle);
+        this.stateMachine.start(startingState);
     }
 
     update():void {
-        this.currentInputState = InputManager.instance.getPlayerInputState(this.inputFramesBehind);
+        this.currentInputState = InputManager.instance.playerInputState;
         this.stateMachine.update();
+    }
+
+    wakeUp():void {
+        console.log("wakey wakey");
+        if (this.stateMachine.currentStateKey == PlayerStates.Sleep) {
+            this.stateMachine.changeState(PlayerStates.Idle);
+        }
     }
 
     lateUpdate():void {
@@ -76,5 +87,9 @@ class BasePlayer extends Entity
         else {
             this.speed.x -= deceleration * NumberUtil.sign(this.speed.x);
         }
+    }
+
+    public getStateMachine():StateMachine<BasePlayer> {
+        return this.stateMachine;
     }
 }

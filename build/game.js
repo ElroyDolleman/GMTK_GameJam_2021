@@ -213,15 +213,15 @@ class Input {
     }
 }
 class InputManager {
-    constructor() {
-        this.playerInputStates = [];
-        this.maxStoredInputs = 1 * 60 + 4;
-    }
+    constructor() { }
+    // private playerInputStates:PlayerInputsState[] = [];
+    // private maxStoredInputs:number = 1*60 + 4;
     get defaultPlayerInputsState() {
         return {
             leftFrames: 0,
             rightFrames: 0,
-            jumpFrames: 0
+            jumpFrames: 0,
+            downFrames: 0
         };
     }
     static get instance() {
@@ -234,28 +234,32 @@ class InputManager {
         this.left = new Input(scene.input.keyboard.addKey('left'));
         this.right = new Input(scene.input.keyboard.addKey('right'));
         this.jump = new Input(scene.input.keyboard.addKey('up'));
+        this.down = new Input(scene.input.keyboard.addKey('down'));
     }
     update() {
         this.left.update();
         this.right.update();
         this.jump.update();
-        this.playerInputStates.push(this.createPlayerState());
-        if (this.playerInputStates.length > this.maxStoredInputs) {
-            this.playerInputStates.splice(0, 1);
-        }
+        this.down.update();
+        // this.playerInputStates.push(this.createPlayerState());
+        // if (this.playerInputStates.length > this.maxStoredInputs) {
+        //     this.playerInputStates.splice(0, 1);
+        // }
+        this.playerInputState = this.createPlayerState();
     }
-    getPlayerInputState(framesBehind = 0) {
-        let index = this.playerInputStates.length - 1 - framesBehind;
-        if (index < 0) {
-            return this.defaultPlayerInputsState;
-        }
-        return this.playerInputStates[index];
-    }
+    // public getPlayerInputState(/*framesBehind:number = 0*/):PlayerInputsState {
+    //     // let index = this.playerInputStates.length - 1 - framesBehind;
+    //     // if (index < 0) {
+    //     //     return this.defaultPlayerInputsState;
+    //     // }
+    //     // return this.playerInputStates[index];
+    // }
     createPlayerState() {
         return {
             leftFrames: this.left.heldDownFrames,
             rightFrames: this.right.heldDownFrames,
-            jumpFrames: this.jump.heldDownFrames
+            jumpFrames: this.jump.heldDownFrames,
+            downFrames: this.down.heldDownFrames
         };
     }
 }
@@ -317,13 +321,17 @@ class LevelLoader {
         TilesetManager.tilesetName = levelJson['tileset_name'];
         let iceSpawn = levelJson['ice_spawn'];
         let fireSpawn = levelJson['fire_spawn'];
+        let fireCharState = fireSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
+        let iceCharState = iceSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
-        let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(fireSpawn.x, fireSpawn.y + 16));
+        let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(fireSpawn.x, fireSpawn.y + 16), fireCharState);
         level.addEntity(firePlayer);
         level.addCollidable(firePlayer);
-        let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(iceSpawn.x, iceSpawn.y + 16));
+        let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(iceSpawn.x, iceSpawn.y + 16), iceCharState);
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
+        icePlayer.getStateMachine().addStateChangedListener(PlayerStates.Sleep, firePlayer.wakeUp, firePlayer);
+        firePlayer.getStateMachine().addStateChangedListener(PlayerStates.Sleep, icePlayer.wakeUp, icePlayer);
         return level;
     }
     createTilemap(levelJson, tilesetJson) {
@@ -601,7 +609,6 @@ class TilesetManager {
         TimeManager.tileAnimations.set(tile.id, tile.sprite.anims);
     }
     static changeTileType(tile, tileType) {
-        console.log("changeTileType", tileType, tile.tiletype);
         tile.tiletype = tileType;
         let tileId = MappedTileTypes.get(tileType);
         tile.changeTileId(tileId);
@@ -614,7 +621,6 @@ class TilesetManager {
      * @returns
      */
     static playAnimationOnTile(tile, frames, onDone) {
-        console.log("playAnimationOnTile", tile.tileId, frames, tile.tileId + frames - 1);
         if (tile.sprite.anims.isPlaying) {
             tile.sprite.stop();
             tile.sprite.anims.remove('tile' + tile.tileId);
@@ -638,9 +644,11 @@ var PlayerStates;
     PlayerStates[PlayerStates["Walk"] = 1] = "Walk";
     PlayerStates[PlayerStates["Fall"] = 2] = "Fall";
     PlayerStates[PlayerStates["Jump"] = 3] = "Jump";
+    PlayerStates[PlayerStates["Crouch"] = 4] = "Crouch";
+    PlayerStates[PlayerStates["Sleep"] = 5] = "Sleep";
 })(PlayerStates || (PlayerStates = {}));
 class BasePlayer extends Entity {
-    constructor(scene, spawnPosition, anim) {
+    constructor(scene, spawnPosition, startingState, anim) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
         this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
         this.sprite.setOrigin(0.5, 1);
@@ -651,11 +659,19 @@ class BasePlayer extends Entity {
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
         this.stateMachine.addState(PlayerStates.Fall, new PlayerFallState());
         this.stateMachine.addState(PlayerStates.Jump, new PlayerJumpState());
-        this.stateMachine.start(PlayerStates.Idle);
+        this.stateMachine.addState(PlayerStates.Crouch, new PlayerCrouchState());
+        this.stateMachine.addState(PlayerStates.Sleep, new PlayerSleepState());
+        this.stateMachine.start(startingState);
     }
     update() {
-        this.currentInputState = InputManager.instance.getPlayerInputState(this.inputFramesBehind);
+        this.currentInputState = InputManager.instance.playerInputState;
         this.stateMachine.update();
+    }
+    wakeUp() {
+        console.log("wakey wakey");
+        if (this.stateMachine.currentStateKey == PlayerStates.Sleep) {
+            this.stateMachine.changeState(PlayerStates.Idle);
+        }
     }
     lateUpdate() {
         this.sprite.setPosition(this.hitbox.centerX, this.hitbox.bottom);
@@ -692,10 +708,13 @@ class BasePlayer extends Entity {
             this.speed.x -= deceleration * NumberUtil.sign(this.speed.x);
         }
     }
+    getStateMachine() {
+        return this.stateMachine;
+    }
 }
 class FirePlayer extends BasePlayer {
-    constructor(scene, spawnPosition) {
-        super(scene, spawnPosition, 'firechar-walk_00.png');
+    constructor(scene, spawnPosition, startingState) {
+        super(scene, spawnPosition, startingState, 'firechar-walk_00.png');
     }
     onCollisionSolved(result) {
         super.onCollisionSolved(result);
@@ -703,9 +722,7 @@ class FirePlayer extends BasePlayer {
             if (result.tiles[i].tiletype == TileTypes.Ice) {
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
                     if (!result.tiles[i].sprite.anims.isPlaying) {
-                        console.log(Date.now());
                         TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
-                            console.log(Date.now());
                             if (result.tiles[i].originalTiletype == TileTypes.Ice) {
                                 result.tiles[i].makeEmpty();
                             }
@@ -725,8 +742,8 @@ class FirePlayer extends BasePlayer {
     }
 }
 class IcePlayer extends BasePlayer {
-    constructor(scene, spawnPosition) {
-        super(scene, spawnPosition, 'icechar-walk_00.png');
+    constructor(scene, spawnPosition, startingState) {
+        super(scene, spawnPosition, startingState, 'icechar-walk_00.png');
         this.solidTileTypes.push(TileTypes.Water);
     }
     onCollisionSolved(result) {
@@ -779,22 +796,6 @@ class PlayerAirborneState {
         this.machine.owner.speed.y = 0;
     }
 }
-class PlayerFallState extends PlayerAirborneState {
-    constructor() {
-        super();
-    }
-    enter() {
-    }
-    update() {
-        this.machine.owner.updateMovementControls();
-        this.updateGravity();
-    }
-    leave() {
-    }
-    onCollisionSolved(result) {
-        super.onCollisionSolved(result);
-    }
-}
 class PlayerGroundedState {
     constructor() { }
     enter() {
@@ -802,6 +803,9 @@ class PlayerGroundedState {
     update() {
         if (this.machine.owner.currentInputState.jumpFrames == 1) {
             this.machine.changeState(PlayerStates.Jump);
+        }
+        else if (this.machine.owner.currentInputState.downFrames == 1) {
+            this.machine.changeState(PlayerStates.Crouch);
         }
     }
     leave() {
@@ -824,6 +828,54 @@ class PlayerGroundedState {
     }
     isStandingOnTile(tile) {
         return CollisionUtil.hitboxVerticallyAligned(this.machine.owner.hitbox, tile.hitbox);
+    }
+}
+/// <reference path="./player_grounded_state.ts"/>
+class PlayerCrouchState extends PlayerGroundedState {
+    constructor() {
+        super();
+    }
+    enter() {
+        this.machine.owner.speed.x = 0;
+    }
+    update() {
+        if (this.machine.owner.currentInputState.downFrames == 0) {
+            this.machine.changeState(PlayerStates.Idle);
+        }
+    }
+    leave() {
+    }
+    onCollisionSolved(result) {
+        if (this.hasTorchUnderneath(result.tiles)) {
+            this.machine.changeState(PlayerStates.Sleep);
+        }
+    }
+    hasTorchUnderneath(tiles) {
+        for (let i = 0; i < tiles.length; i++) {
+            if (tiles[i].tiletype != TileTypes.Torch && tiles[i].tiletype != TileTypes.GoldTorch) {
+                continue;
+            }
+            if (this.isStandingOnTile(tiles[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+class PlayerFallState extends PlayerAirborneState {
+    constructor() {
+        super();
+    }
+    enter() {
+    }
+    update() {
+        this.machine.owner.updateMovementControls();
+        this.updateGravity();
+    }
+    leave() {
+    }
+    onCollisionSolved(result) {
+        super.onCollisionSolved(result);
     }
 }
 class PlayerIdleState extends PlayerGroundedState {
@@ -873,6 +925,19 @@ class PlayerJumpState extends PlayerAirborneState {
         super.onCollisionSolved(result);
     }
 }
+class PlayerSleepState extends PlayerGroundedState {
+    constructor() {
+        super();
+    }
+    enter() {
+    }
+    update() {
+    }
+    leave() {
+    }
+    onCollisionSolved(result) {
+    }
+}
 class PlayerWalkState extends PlayerGroundedState {
     constructor() {
         super();
@@ -892,6 +957,7 @@ class PlayerWalkState extends PlayerGroundedState {
 class StateMachine {
     constructor(owner) {
         this.currentStateKey = -1;
+        this.onStateChanged = new Phaser.Events.EventEmitter();
         this.owner = owner;
         this.states = new Map();
     }
@@ -910,6 +976,10 @@ class StateMachine {
         this.currentState.leave();
         this.currentStateKey = key;
         this.currentState.enter();
+        this.onStateChanged.emit(key.toString());
+    }
+    addStateChangedListener(stateKey, event, context) {
+        this.onStateChanged.addListener(stateKey.toString(), event, context);
     }
 }
 var NumberUtil;

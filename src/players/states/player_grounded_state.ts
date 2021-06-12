@@ -12,6 +12,9 @@ class PlayerGroundedState implements IBaseState<BasePlayer>
         if (this.machine.owner.currentInputState.jumpFrames == 1) {
             this.machine.changeState(PlayerStates.Jump);
         }
+        else if (this.machine.owner.currentInputState.downFrames == 1) {
+            this.machine.changeState(PlayerStates.Crouch);
+        }
     }
 
     public leave(): void {

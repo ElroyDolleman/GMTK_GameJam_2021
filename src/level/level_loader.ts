@@ -38,19 +38,24 @@ class LevelLoader {
 
         let iceSpawn = levelJson['ice_spawn'];
         let fireSpawn = levelJson['fire_spawn'];
+        let fireCharState:PlayerStates = fireSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
+        let iceCharState:PlayerStates = iceSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
 
         let level = new Level(
             this.scene,
             this.createTilemap(levelJson, tilesetJson),
         );
 
-        let firePlayer:FirePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(fireSpawn.x, fireSpawn.y+16));
+        let firePlayer:FirePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(fireSpawn.x, fireSpawn.y+16), fireCharState);
         level.addEntity(firePlayer);
         level.addCollidable(firePlayer);
 
-        let icePlayer:IcePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(iceSpawn.x, iceSpawn.y+16));
+        let icePlayer:IcePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(iceSpawn.x, iceSpawn.y+16), iceCharState);
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
+
+        icePlayer.getStateMachine().addStateChangedListener(PlayerStates.Sleep, firePlayer.wakeUp, firePlayer);
+        firePlayer.getStateMachine().addStateChangedListener(PlayerStates.Sleep, icePlayer.wakeUp, icePlayer);
 
         return level;
     }
