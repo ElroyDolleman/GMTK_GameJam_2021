@@ -14,6 +14,7 @@ class Tile
     public tiletype:TileType;
 
     public get isSolid():boolean { return this.tiletype == TileType.Solid }
+    public get canStandOn():boolean { return this.isSolid; }
 
     //private debug:Phaser.GameObjects.Graphics;
 

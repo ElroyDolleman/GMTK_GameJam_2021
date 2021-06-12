@@ -100,6 +100,15 @@ class CollisionManager {
         }
     }
 }
+class CollisionUtil {
+    constructor() { }
+    static hitboxVerticallyAligned(topHitbox, bottomHitbox) {
+        if (bottomHitbox.top == topHitbox.bottom) {
+            return topHitbox.right > bottomHitbox.left && topHitbox.left < bottomHitbox.right;
+        }
+        return false;
+    }
+}
 let TILE_WIDTH = 16;
 let TILE_HEIGHT = 16;
 class Entity {
@@ -257,10 +266,10 @@ class LevelLoader {
         let levelJson = this.jsonData[name];
         let tilesetJson = this.jsonData['tilesets_data'][levelJson['tileset_name']];
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
-        let player2 = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288), 1 * 60, 'firechar-walk_00.png');
+        let player2 = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60, 'firechar-walk_00.png');
         level.addEntity(player2);
         level.addCollidable(player2);
-        let player = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288), 0, 'icechar-walk_00.png');
+        let player = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 0, 'icechar-walk_00.png');
         level.addEntity(player);
         level.addCollidable(player);
         return level;
@@ -350,6 +359,7 @@ class Tile {
         // }
     }
     get isSolid() { return this.tiletype == TileType.Solid; }
+    get canStandOn() { return this.isSolid; }
     makeEmpty() {
         this.tiletype = TileType.Empty;
         this.sprite.destroy();
@@ -426,6 +436,8 @@ var PlayerStates;
 (function (PlayerStates) {
     PlayerStates[PlayerStates["Idle"] = 0] = "Idle";
     PlayerStates[PlayerStates["Walk"] = 1] = "Walk";
+    PlayerStates[PlayerStates["Fall"] = 2] = "Fall";
+    PlayerStates[PlayerStates["Jump"] = 3] = "Jump";
 })(PlayerStates || (PlayerStates = {}));
 class BasePlayer extends Entity {
     constructor(scene, spawnPosition, inputFramesBehind, anim) {
@@ -438,6 +450,8 @@ class BasePlayer extends Entity {
         this.stateMachine = new StateMachine(this);
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
+        this.stateMachine.addState(PlayerStates.Fall, new PlayerFallState());
+        this.stateMachine.addState(PlayerStates.Jump, new PlayerJumpState());
         this.stateMachine.start(PlayerStates.Idle);
     }
     update() {
@@ -448,6 +462,7 @@ class BasePlayer extends Entity {
         this.sprite.setPosition(this.hitbox.centerX, this.hitbox.bottom);
     }
     onCollisionSolved(result) {
+        this.stateMachine.currentState.onCollisionSolved(result);
     }
     updateMovementControls(maxRunSpeed = 120, runAcceleration = 20) {
         if (this.currentInputState.leftFrames > 0) {
@@ -479,14 +494,77 @@ class BasePlayer extends Entity {
         }
     }
 }
+class PlayerAirborneState {
+    constructor() { }
+    enter() {
+    }
+    update() {
+    }
+    leave() {
+    }
+    onCollisionSolved(result) {
+        if (result.onBottom) {
+            this.onLand();
+        }
+        else if (result.onTop) {
+            this.headbonk();
+        }
+    }
+    updateGravity(gravity = 20, maxFallSpeed = 260) {
+        if (this.machine.owner.speed.y < maxFallSpeed) {
+            this.machine.owner.speed.y = Math.min(this.machine.owner.speed.y + gravity, maxFallSpeed);
+        }
+    }
+    onLand() {
+        this.machine.owner.speed.y = 0;
+        let state = this.machine.owner.speed.x == 0 ? PlayerStates.Idle : PlayerStates.Walk;
+        this.machine.changeState(state);
+    }
+    headbonk() {
+        this.machine.owner.speed.y = 0;
+    }
+}
+class PlayerFallState extends PlayerAirborneState {
+    constructor() {
+        super();
+    }
+    enter() {
+    }
+    update() {
+        this.machine.owner.updateMovementControls();
+        this.updateGravity();
+    }
+    leave() {
+    }
+    onCollisionSolved(result) {
+    }
+}
 class PlayerGroundedState {
     constructor() { }
     enter() {
     }
     update() {
-        this.machine.owner.updateMovementControls();
     }
     leave() {
+    }
+    onCollisionSolved(result) {
+        if (!this.hasGroundUnderneath(result.tiles)) {
+            this.machine.changeState(PlayerStates.Fall);
+        }
+    }
+    hasGroundUnderneath(tiles) {
+        for (let i = 0; i < tiles.length; i++) {
+            if (!tiles[i].canStandOn) {
+                continue;
+            }
+            if (this.isStandingOnTile(tiles[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    isStandingOnTile(tile) {
+        return CollisionUtil.hitboxVerticallyAligned(this.machine.owner.hitbox, tile.hitbox);
     }
 }
 class PlayerIdleState extends PlayerGroundedState {
@@ -497,8 +575,25 @@ class PlayerIdleState extends PlayerGroundedState {
     }
     update() {
         super.update();
+        this.machine.owner.updateMovementControls();
+        if (this.machine.owner.speed.x != 0) {
+            this.machine.changeState(PlayerStates.Walk);
+        }
     }
     leave() {
+    }
+}
+class PlayerJumpState extends PlayerAirborneState {
+    constructor() {
+        super();
+    }
+    enter() {
+    }
+    update() {
+    }
+    leave() {
+    }
+    onCollisionSolved(result) {
     }
 }
 class PlayerWalkState extends PlayerGroundedState {
@@ -509,6 +604,10 @@ class PlayerWalkState extends PlayerGroundedState {
     }
     update() {
         super.update();
+        this.machine.owner.updateMovementControls();
+        if (this.machine.owner.speed.x == 0) {
+            this.machine.changeState(PlayerStates.Idle);
+        }
     }
     leave() {
     }

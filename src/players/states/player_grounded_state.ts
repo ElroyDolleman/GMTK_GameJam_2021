@@ -8,9 +8,31 @@ class PlayerGroundedState implements IBaseState<BasePlayer>
         
     }
     public update(): void {
-        this.machine.owner.updateMovementControls();
+        
     }
     public leave(): void {
         
+    }
+
+    onCollisionSolved(result: CollisionResult): void {
+        if (!this.hasGroundUnderneath(result.tiles)) {
+            this.machine.changeState(PlayerStates.Fall);
+        }
+    }
+
+    protected hasGroundUnderneath(tiles: Tile[]):boolean {
+        for (let i = 0; i < tiles.length; i++) {
+            if (!tiles[i].canStandOn) {
+                continue;
+            }
+            if (this.isStandingOnTile(tiles[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected isStandingOnTile(tile: Tile):boolean {
+        return CollisionUtil.hitboxVerticallyAligned(this.machine.owner.hitbox, tile.hitbox);
     }
 }

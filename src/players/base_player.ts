@@ -2,7 +2,9 @@
 
 enum PlayerStates {
     Idle,
-    Walk
+    Walk,
+    Fall,
+    Jump
 }
 
 class BasePlayer extends Entity
@@ -25,6 +27,8 @@ class BasePlayer extends Entity
         this.stateMachine = new StateMachine(this);
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
+        this.stateMachine.addState(PlayerStates.Fall, new PlayerFallState());
+        this.stateMachine.addState(PlayerStates.Jump, new PlayerJumpState());
 
         this.stateMachine.start(PlayerStates.Idle);
     }
@@ -39,7 +43,7 @@ class BasePlayer extends Entity
     }
 
     onCollisionSolved(result: CollisionResult):void {
-
+        this.stateMachine.currentState.onCollisionSolved(result);
     }
 
     updateMovementControls(maxRunSpeed: number = 120, runAcceleration: number = 20) {

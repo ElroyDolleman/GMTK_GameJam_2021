@@ -38,11 +38,11 @@ class LevelLoader {
             this.createTilemap(levelJson, tilesetJson),
         );
 
-        let player2:BasePlayer = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288), 1*60, 'firechar-walk_00.png');
+        let player2:BasePlayer = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288-16), 1*60, 'firechar-walk_00.png');
         level.addEntity(player2);
         level.addCollidable(player2);
 
-        let player:BasePlayer = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288), 0, 'icechar-walk_00.png');
+        let player:BasePlayer = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288-16), 0, 'icechar-walk_00.png');
         level.addEntity(player);
         level.addCollidable(player);
 
