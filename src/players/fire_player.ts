@@ -15,6 +15,12 @@ class FirePlayer extends BasePlayer
                     result.tiles[i].makeEmpty();
                 }
             }
+            else if (result.tiles[i].tiletype == TileType.Grass) {
+                if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
+
+                    TilesetManager.changeTileType(result.tiles[i], TileType.Fire);
+                }
+            }
         }
     }
 }

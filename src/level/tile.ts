@@ -7,6 +7,13 @@ enum TileType {
     Water,
 }
 
+const MappedTileTypes = new Map<number, number>([
+    [TileType.Ice, 9],
+    [TileType.Grass, 23],
+    [TileType.Fire, 24],
+    [TileType.Water, 34],
+]);
+
 class Tile
 {
     public readonly cellX:number;

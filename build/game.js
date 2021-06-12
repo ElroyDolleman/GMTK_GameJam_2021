@@ -277,6 +277,8 @@ class LevelLoader {
     create(name) {
         let levelJson = this.jsonData[name];
         let tilesetJson = this.jsonData['tilesets_data'][levelJson['tileset_name']];
+        TilesetManager.tilesetJson = tilesetJson;
+        TilesetManager.tilesetName = levelJson['tileset_name'];
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
         let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60);
         level.addEntity(firePlayer);
@@ -305,20 +307,9 @@ class LevelLoader {
             let sprite = null;
             if (tileId >= 0) {
                 sprite = this.makeSprite(tileId, posX, posY, rotation, levelJson['tileset_name']);
-                // Create animation if there are any
-                if (tilesetJson['animations'][tileId] != undefined) {
-                    let amountOfFrames = tilesetJson['animations'][tileId];
-                    let key = 'tile';
-                    sprite.anims.create({
-                        key: 'tile',
-                        frames: sprite.anims.generateFrameNumbers(levelJson['tileset_name'], { start: tileId, end: tileId + amountOfFrames - 1 }),
-                        frameRate: 10,
-                        repeat: -1
-                    });
-                    sprite.play(key);
-                }
+                TilesetManager.startTileAnimation(sprite, tileId);
             }
-            let tileType = this.getTileType(tilesetJson, tileId);
+            let tileType = TilesetManager.getTileTypeFromID(tileId);
             let hitbox = new Phaser.Geom.Rectangle(posX, posY, TILE_WIDTH, TILE_HEIGHT);
             tiles.push(new Tile(sprite, tileType, cellX, cellY, posX, posY, hitbox));
         }
@@ -335,28 +326,6 @@ class LevelLoader {
         sprite.setOrigin(0.5, 0.5);
         sprite.setRotation(rotation);
         return sprite;
-    }
-    getTileType(tilesetJson, tileId) {
-        if (tileId < 0) {
-            return TileType.Empty;
-        }
-        let tiletypes = tilesetJson['tiletypes'];
-        if (tiletypes['solid'].indexOf(tileId) >= 0) {
-            return TileType.Solid;
-        }
-        if (tiletypes['ice'].indexOf(tileId) >= 0) {
-            return TileType.Ice;
-        }
-        if (tiletypes['water'].indexOf(tileId) >= 0) {
-            return TileType.Water;
-        }
-        if (tiletypes['grass'].indexOf(tileId) >= 0) {
-            return TileType.Grass;
-        }
-        if (tiletypes['fire'].indexOf(tileId) >= 0) {
-            return TileType.Fire;
-        }
-        return TileType.Empty;
     }
     getRotation(tileId) {
         let flippedH = (tileId & FLIPPED_HORIZONTALLY_FLAG) > 0;
@@ -384,6 +353,12 @@ var TileType;
     TileType[TileType["Fire"] = 4] = "Fire";
     TileType[TileType["Water"] = 5] = "Water";
 })(TileType || (TileType = {}));
+const MappedTileTypes = new Map([
+    [TileType.Ice, 9],
+    [TileType.Grass, 23],
+    [TileType.Fire, 24],
+    [TileType.Water, 34],
+]);
 class Tile {
     //private debug:Phaser.GameObjects.Graphics;
     constructor(sprite, tiletype, cellX, cellY, posX, posY, hitbox) {
@@ -470,6 +445,51 @@ class Tilemap {
         }
     }
 }
+class TilesetManager {
+    constructor() { }
+    static getTileTypeFromID(tileId) {
+        if (tileId < 0) {
+            return TileType.Empty;
+        }
+        let tiletypes = this.tilesetJson['tiletypes'];
+        if (tiletypes['solid'].indexOf(tileId) >= 0) {
+            return TileType.Solid;
+        }
+        if (tiletypes['ice'].indexOf(tileId) >= 0) {
+            return TileType.Ice;
+        }
+        if (tiletypes['water'].indexOf(tileId) >= 0) {
+            return TileType.Water;
+        }
+        if (tiletypes['grass'].indexOf(tileId) >= 0) {
+            return TileType.Grass;
+        }
+        if (tiletypes['fire'].indexOf(tileId) >= 0) {
+            return TileType.Fire;
+        }
+        return TileType.Empty;
+    }
+    static startTileAnimation(sprite, tileId) {
+        if (this.tilesetJson['animations'][tileId] === undefined) {
+            return;
+        }
+        let amountOfFrames = this.tilesetJson['animations'][tileId];
+        let key = 'tile';
+        let frames = sprite.anims.generateFrameNumbers(this.tilesetName, { start: tileId, end: tileId + amountOfFrames - 1 });
+        sprite.anims.create({
+            key: 'tile',
+            frames: frames,
+            frameRate: 10,
+            repeat: -1
+        });
+        sprite.play(key);
+    }
+    static changeTileType(tile, tileType) {
+        tile.tiletype = tileType;
+        let tileId = MappedTileTypes.get(tileType);
+        this.startTileAnimation(tile.sprite, tileId);
+    }
+}
 /// <reference path="../entities/entity.ts"/>
 var PlayerStates;
 /// <reference path="../entities/entity.ts"/>
@@ -546,6 +566,11 @@ class FirePlayer extends BasePlayer {
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
                     //TODO: Melt slowly
                     result.tiles[i].makeEmpty();
+                }
+            }
+            else if (result.tiles[i].tiletype == TileType.Grass) {
+                if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
+                    TilesetManager.changeTileType(result.tiles[i], TileType.Fire);
                 }
             }
         }

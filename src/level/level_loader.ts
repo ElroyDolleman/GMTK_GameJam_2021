@@ -33,6 +33,9 @@ class LevelLoader {
         let levelJson = this.jsonData[name];
         let tilesetJson = this.jsonData['tilesets_data'][levelJson['tileset_name']];
 
+        TilesetManager.tilesetJson = tilesetJson;
+        TilesetManager.tilesetName = levelJson['tileset_name'];
+
         let level = new Level(
             this.scene,
             this.createTilemap(levelJson, tilesetJson),
@@ -76,23 +79,10 @@ class LevelLoader {
             let sprite = null
             if (tileId >= 0) {
                 sprite = this.makeSprite(tileId, posX, posY, rotation, levelJson['tileset_name']);
-
-                // Create animation if there are any
-                if (tilesetJson['animations'][tileId] != undefined) {
-                    let amountOfFrames:number = tilesetJson['animations'][tileId];
-
-                    let key = 'tile';
-                    sprite.anims.create({
-                        key: 'tile',
-                        frames: sprite.anims.generateFrameNumbers(levelJson['tileset_name'], { start: tileId, end: tileId + amountOfFrames-1 }),
-                        frameRate: 10,
-                        repeat: -1
-                    });
-                    sprite.play(key);
-                }
+                TilesetManager.startTileAnimation(sprite, tileId);
             }
 
-            let tileType = this.getTileType(tilesetJson, tileId);
+            let tileType = TilesetManager.getTileTypeFromID(tileId);
             let hitbox = new Phaser.Geom.Rectangle(posX, posY, TILE_WIDTH, TILE_HEIGHT);
             tiles.push(new Tile(sprite, tileType, cellX, cellY, posX, posY, hitbox));
         }
@@ -112,32 +102,6 @@ class LevelLoader {
         sprite.setOrigin(0.5, 0.5);
         sprite.setRotation(rotation);
         return sprite;
-    }
-
-    private getTileType(tilesetJson:any, tileId:number):TileType {
-        if (tileId < 0) {
-            return TileType.Empty;
-        }
-
-        let tiletypes = tilesetJson['tiletypes'];
-
-        if (tiletypes['solid'].indexOf(tileId) >= 0) {
-            return TileType.Solid;
-        }
-        if (tiletypes['ice'].indexOf(tileId) >= 0) {
-            return TileType.Ice;
-        }
-        if (tiletypes['water'].indexOf(tileId) >= 0) {
-            return TileType.Water;
-        }
-        if (tiletypes['grass'].indexOf(tileId) >= 0) {
-            return TileType.Grass;
-        }
-        if (tiletypes['fire'].indexOf(tileId) >= 0) {
-            return TileType.Fire;
-        }
-
-        return TileType.Empty;
     }
 
     private getRotation(tileId:number):number {
