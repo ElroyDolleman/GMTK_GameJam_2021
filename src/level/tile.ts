@@ -16,8 +16,11 @@ const MappedTileTypes = new Map<number, number>([
 
 class Tile
 {
+    public get id():string { return this.cellX.toString() + this.cellY.toString(); }
+
     public readonly cellX:number;
     public readonly cellY:number;
+    public readonly originalTiletype:number;
 
     public sprite:Phaser.GameObjects.Sprite;
     public hitbox:Phaser.Geom.Rectangle;
@@ -37,8 +40,13 @@ class Tile
         this.tileId = tileId;
 
         this.tiletype = tiletype;
+        this.originalTiletype = tiletype;
         this.hitbox = hitbox;
         this.sprite = sprite;
+
+        if (tileId > 0) {
+            TilesetManager.startTileAnimation(this, tileId);
+        }
 
         // if (this.sprite) {
         //     this.debug = elroy.add.graphics({ fillStyle: { color: 0xFF, alpha: 1 } });
@@ -49,6 +57,11 @@ class Tile
     public makeEmpty() {
         this.tiletype = TileType.Empty;
         this.sprite.destroy();
+    }
+
+    public changeTileId(newTileId:number) {
+        this.sprite.setFrame(newTileId);
+        this.tileId = newTileId;
     }
 
     public destroy() {

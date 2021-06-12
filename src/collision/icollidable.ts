@@ -1,5 +1,7 @@
 interface ICollidable
 {
+    solidTileTypes:TileType[];
+
     hitbox:Phaser.Geom.Rectangle;
     nextHitbox:Phaser.Geom.Rectangle;
     speed:Phaser.Math.Vector2;

@@ -4,6 +4,7 @@ class GameScene extends Phaser.Scene {
     }
     init() {
         this.levelLoader = new LevelLoader(this);
+        TimeManager.initialize();
     }
     preload() {
         this.load.atlas('player_sheet', 'assets/player_sheet.png', 'assets/player_sheet.json');
@@ -38,6 +39,24 @@ var config = {
     scene: [GameScene],
 };
 var game = new Phaser.Game(config);
+class TimeManager {
+    constructor() { }
+    static initialize() {
+        this.startTime = new Date();
+        this.globalAnimationUpdateInterval = setInterval(this.globalAnimationUpdate.bind(this), 200);
+    }
+    static getTimeSinceStartup() {
+        return Date.now() - this.startTime.getTime();
+    }
+    static globalAnimationUpdate() {
+        this.animationFrame++;
+        this.tileAnimations.forEach((anim) => {
+            anim.setCurrentFrame(anim.currentAnim.frames[this.animationFrame % 4]);
+        });
+    }
+}
+TimeManager.tileAnimations = new Map();
+TimeManager.animationFrame = 0;
 class CollisionResult {
     constructor() {
         this.onTop = false;
@@ -60,7 +79,7 @@ class CollisionManager {
             if (!this.overlapsNonEmptyTile(tiles[i], collidable)) {
                 continue;
             }
-            if (tiles[i].isSolid) {
+            if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveHorizontalCollision(tiles[i], collidable, result);
             }
         }
@@ -69,7 +88,7 @@ class CollisionManager {
             if (!this.overlapsNonEmptyTile(tiles[i], collidable)) {
                 continue;
             }
-            else if (tiles[i].isSolid) {
+            else if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveVerticalCollision(tiles[i], collidable, result);
             }
         }
@@ -127,6 +146,7 @@ class Entity {
     constructor(hitbox) {
         this._hitbox = hitbox;
         this.speed = new Phaser.Math.Vector2();
+        this.solidTileTypes = [];
     }
     get hitbox() {
         return this._hitbox;
@@ -147,8 +167,6 @@ class Entity {
     moveY() {
         this._hitbox.y += this.speed.y * TimeUtil.getElapsed();
     }
-}
-class CollidableEntity {
 }
 class Input {
     constructor(key) {
@@ -307,7 +325,6 @@ class LevelLoader {
             let sprite = null;
             if (tileId >= 0) {
                 sprite = this.makeSprite(tileId, posX, posY, rotation, levelJson['tileset_name']);
-                TilesetManager.startTileAnimation(sprite, tileId);
             }
             let tileType = TilesetManager.getTileTypeFromID(tileId);
             let hitboxData = tilesetJson['customHitboxes'][tileId.toString()];
@@ -410,18 +427,27 @@ class Tile {
         this.cellY = cellY;
         this.tileId = tileId;
         this.tiletype = tiletype;
+        this.originalTiletype = tiletype;
         this.hitbox = hitbox;
         this.sprite = sprite;
+        if (tileId > 0) {
+            TilesetManager.startTileAnimation(this, tileId);
+        }
         // if (this.sprite) {
         //     this.debug = elroy.add.graphics({ fillStyle: { color: 0xFF, alpha: 1 } });
         //     this.debug.fillRectShape(hitbox);
         // }
     }
+    get id() { return this.cellX.toString() + this.cellY.toString(); }
     get isSolid() { return this.tiletype == TileType.Solid || this.tiletype == TileType.Ice; }
     get canStandOn() { return this.isSolid; }
     makeEmpty() {
         this.tiletype = TileType.Empty;
         this.sprite.destroy();
+    }
+    changeTileId(newTileId) {
+        this.sprite.setFrame(newTileId);
+        this.tileId = newTileId;
     }
     destroy() {
         if (this.sprite) {
@@ -513,35 +539,62 @@ class TilesetManager {
         }
         return TileType.Empty;
     }
-    static startTileAnimation(sprite, tileId) {
+    /**
+     * Start a repeating tile animation
+     * @param sprite
+     * @param tileId
+     * @returns
+     */
+    static startTileAnimation(tile, tileId) {
         if (this.tilesetJson['animations'][tileId] === undefined) {
+            if (tile.sprite.anims.isPlaying) {
+                tile.sprite.stop();
+            }
+            if (TimeManager.tileAnimations.has(tile.id)) {
+                TimeManager.tileAnimations.delete(tile.id);
+            }
             return;
         }
         let amountOfFrames = this.tilesetJson['animations'][tileId];
-        let key = 'tile';
-        let frames = sprite.anims.generateFrameNumbers(this.tilesetName, { start: tileId, end: tileId + amountOfFrames - 1 });
-        sprite.anims.create({
-            key: 'tile',
+        let key = 'tile' + tileId;
+        let frames = tile.sprite.anims.generateFrameNumbers(this.tilesetName, { start: tileId, end: tileId + amountOfFrames - 1 });
+        tile.sprite.anims.create({
+            key: key,
             frames: frames,
-            frameRate: 10,
+            frameRate: 0,
             repeat: -1
         });
-        sprite.play(key);
+        tile.sprite.play(key);
+        TimeManager.tileAnimations.set(tile.id, tile.sprite.anims);
     }
     static changeTileType(tile, tileType) {
+        console.log("changeTileType", tileType, tile.tiletype);
         tile.tiletype = tileType;
         let tileId = MappedTileTypes.get(tileType);
-        this.startTileAnimation(tile.sprite, tileId);
+        tile.changeTileId(tileId);
+        this.startTileAnimation(tile, tileId);
     }
+    /**
+     * Play single tile animation
+     * @param sprite
+     * @param tileId
+     * @returns
+     */
     static playAnimationOnTile(tile, frames, onDone) {
-        let key = 'tile';
+        console.log("playAnimationOnTile", tile.tileId, frames, tile.tileId + frames - 1);
+        if (tile.sprite.anims.isPlaying) {
+            tile.sprite.stop();
+            tile.sprite.anims.remove('tile' + tile.tileId);
+        }
+        let key = 'tile' + tile.tileId;
         tile.sprite.anims.create({
-            key: 'tile',
+            key: key,
             frames: tile.sprite.anims.generateFrameNumbers(this.tilesetName, { start: tile.tileId, end: tile.tileId + frames - 1 }),
             frameRate: 10,
+            repeat: 0
         });
         tile.sprite.play(key);
-        tile.sprite.on('animationcomplete', onDone);
+        tile.sprite.once('animationcomplete', onDone);
     }
 }
 /// <reference path="../entities/entity.ts"/>
@@ -618,8 +671,15 @@ class FirePlayer extends BasePlayer {
             if (result.tiles[i].tiletype == TileType.Ice) {
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
                     if (!result.tiles[i].sprite.anims.isPlaying) {
+                        console.log(Date.now());
                         TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
-                            result.tiles[i].makeEmpty();
+                            console.log(Date.now());
+                            if (result.tiles[i].originalTiletype == TileType.Ice) {
+                                result.tiles[i].makeEmpty();
+                            }
+                            else {
+                                TilesetManager.changeTileType(result.tiles[i], result.tiles[i].originalTiletype);
+                            }
                         });
                     }
                 }
@@ -635,6 +695,17 @@ class FirePlayer extends BasePlayer {
 class IcePlayer extends BasePlayer {
     constructor(scene, spawnPosition, inputFramesBehind) {
         super(scene, spawnPosition, inputFramesBehind, 'icechar-walk_00.png');
+        this.solidTileTypes.push(TileType.Water);
+    }
+    onCollisionSolved(result) {
+        super.onCollisionSolved(result);
+        for (let i = 0; i < result.tiles.length; i++) {
+            if (result.tiles[i].tiletype == TileType.Water) {
+                if (CollisionUtil.hitboxVerticallyAligned(this.hitbox, result.tiles[i].hitbox)) {
+                    TilesetManager.changeTileType(result.tiles[i], TileType.Ice);
+                }
+            }
+        }
     }
 }
 var PlayerStats;
@@ -818,6 +889,16 @@ var NumberUtil;
         return value == 0 ? 0 : value > 0 ? 1 : -1;
     }
     NumberUtil.sign = sign;
+    function lerp(start, stop, amount) {
+        if (amount > 1) {
+            amount = 1;
+        }
+        else if (amount < 0) {
+            amount = 0;
+        }
+        return start + (stop - start) * amount;
+    }
+    NumberUtil.lerp = lerp;
 })(NumberUtil || (NumberUtil = {}));
 class TimeUtil {
     constructor() {

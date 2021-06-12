@@ -12,8 +12,15 @@ class FirePlayer extends BasePlayer
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
 
                     if (!result.tiles[i].sprite.anims.isPlaying) {
+                        console.log(Date.now());
                         TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
-                            result.tiles[i].makeEmpty();
+                            console.log(Date.now());
+                            if (result.tiles[i].originalTiletype == TileType.Ice) {
+                                result.tiles[i].makeEmpty();
+                            }
+                            else {
+                                TilesetManager.changeTileType(result.tiles[i], result.tiles[i].originalTiletype);
+                            }
                         });
                     }
                 }

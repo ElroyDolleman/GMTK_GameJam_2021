@@ -79,7 +79,6 @@ class LevelLoader {
             let sprite = null
             if (tileId >= 0) {
                 sprite = this.makeSprite(tileId, posX, posY, rotation, levelJson['tileset_name']);
-                TilesetManager.startTileAnimation(sprite, tileId);
             }
 
             let tileType = TilesetManager.getTileTypeFromID(tileId);

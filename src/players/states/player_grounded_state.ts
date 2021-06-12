@@ -18,7 +18,7 @@ class PlayerGroundedState implements IBaseState<BasePlayer>
         
     }
 
-    onCollisionSolved(result: CollisionResult): void {
+    public onCollisionSolved(result: CollisionResult): void {
         if (!this.hasGroundUnderneath(result.tiles)) {
             this.machine.changeState(PlayerStates.Fall);
         }

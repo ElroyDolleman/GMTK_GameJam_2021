@@ -9,6 +9,7 @@ class GameScene extends Phaser.Scene
 
     init() {
         this.levelLoader = new LevelLoader(this);
+        TimeManager.initialize();
     }
 
     preload() {

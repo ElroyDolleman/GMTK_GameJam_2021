@@ -26,7 +26,7 @@ class CollisionManager {
                 continue;
             }
 
-            if (tiles[i].isSolid) {
+            if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveHorizontalCollision(tiles[i], collidable, result);
             }
         }
@@ -38,7 +38,7 @@ class CollisionManager {
                 continue;
             }
 
-            else if (tiles[i].isSolid) {
+            else if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveVerticalCollision(tiles[i], collidable, result);
             }
         }
