@@ -5,7 +5,7 @@ class InputManager
     private jump:Input;
 
     private playerInputStates:PlayerInputsState[] = [];
-    private maxStoredInputs:number = 5*60 + 5;
+    private maxStoredInputs:number = 1*60 + 4;
 
     public get defaultPlayerInputsState():PlayerInputsState { 
         return {
@@ -28,11 +28,6 @@ class InputManager
         this.left = new Input(scene.input.keyboard.addKey('left'));
         this.right = new Input(scene.input.keyboard.addKey('right'));
         this.jump = new Input(scene.input.keyboard.addKey('up'));
-
-        // setTimeout(() => {
-        //     console.log(this.playerInputStates);
-        //     debugger;
-        // }, 6000);
     }
 
     public update() {

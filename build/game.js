@@ -158,7 +158,7 @@ class Input {
 class InputManager {
     constructor() {
         this.playerInputStates = [];
-        this.maxStoredInputs = 5 * 60 + 5;
+        this.maxStoredInputs = 1 * 60 + 4;
     }
     get defaultPlayerInputsState() {
         return {
@@ -177,10 +177,6 @@ class InputManager {
         this.left = new Input(scene.input.keyboard.addKey('left'));
         this.right = new Input(scene.input.keyboard.addKey('right'));
         this.jump = new Input(scene.input.keyboard.addKey('up'));
-        // setTimeout(() => {
-        //     console.log(this.playerInputStates);
-        //     debugger;
-        // }, 6000);
     }
     update() {
         this.left.update();
@@ -261,7 +257,10 @@ class LevelLoader {
         let levelJson = this.jsonData[name];
         let tilesetJson = this.jsonData['tilesets_data'][levelJson['tileset_name']];
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
-        let player = new BasePlayer(this.scene, new Phaser.Math.Vector2(100, 100));
+        let player2 = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288), 1 * 60, 'firechar-walk_00.png');
+        level.addEntity(player2);
+        level.addCollidable(player2);
+        let player = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288), 0, 'icechar-walk_00.png');
         level.addEntity(player);
         level.addCollidable(player);
         return level;
@@ -429,9 +428,10 @@ var PlayerStates;
     PlayerStates[PlayerStates["Walk"] = 1] = "Walk";
 })(PlayerStates || (PlayerStates = {}));
 class BasePlayer extends Entity {
-    constructor(scene, spawnPosition) {
+    constructor(scene, spawnPosition, inputFramesBehind, anim) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x, spawnPosition.y - 16, 16, 16));
-        this.sprite = scene.add.sprite(0, 0, 'player_sheet', 'icechar-walk_00.png');
+        this.inputFramesBehind = inputFramesBehind;
+        this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
         this.sprite.setOrigin(0.5, 1);
         this.sprite.x = spawnPosition.x;
         this.sprite.y = spawnPosition.y;
@@ -439,10 +439,9 @@ class BasePlayer extends Entity {
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
         this.stateMachine.start(PlayerStates.Idle);
-        this.speed.y = 150;
     }
     update() {
-        this.currentInputState = InputManager.instance.getPlayerInputState(0);
+        this.currentInputState = InputManager.instance.getPlayerInputState(this.inputFramesBehind);
         this.stateMachine.update();
     }
     lateUpdate() {

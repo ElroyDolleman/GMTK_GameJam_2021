@@ -11,11 +11,13 @@ class BasePlayer extends Entity
 
     private sprite:Phaser.GameObjects.Sprite;
     private currentInputState: PlayerInputsState;
+    private inputFramesBehind:number;
 
-    constructor(scene:Phaser.Scene, spawnPosition: Phaser.Math.Vector2) {
+    constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, inputFramesBehind:number, anim:string) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x, spawnPosition.y - 16, 16, 16));
+        this.inputFramesBehind = inputFramesBehind;
 
-        this.sprite = scene.add.sprite(0, 0, 'player_sheet', 'icechar-walk_00.png');
+        this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
         this.sprite.setOrigin(0.5, 1);
         this.sprite.x = spawnPosition.x;
         this.sprite.y = spawnPosition.y;
@@ -25,12 +27,10 @@ class BasePlayer extends Entity
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
 
         this.stateMachine.start(PlayerStates.Idle);
-
-        this.speed.y = 150;
     }
 
     update():void {
-        this.currentInputState = InputManager.instance.getPlayerInputState(0);
+        this.currentInputState = InputManager.instance.getPlayerInputState(this.inputFramesBehind);
         this.stateMachine.update();
     }
 
