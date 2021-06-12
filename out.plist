@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>frames</key>
+        <dict>
+            <key>main_tileset.png</key>
+            <dict>
+                <key>aliases</key>
+                <array/>
+                <key>spriteOffset</key>
+                <string>{-12,99}</string>
+                <key>spriteSize</key>
+                <string>{224,50}</string>
+                <key>spriteSourceSize</key>
+                <string>{248,248}</string>
+                <key>textureRect</key>
+                <string>{{0,0},{224,50}}</string>
+                <key>textureRotated</key>
+                <false/>
+            </dict>
+        </dict>
+        <key>metadata</key>
+        <dict>
+            <key>format</key>
+            <integer>3</integer>
+            <key>pixelFormat</key>
+            <string>RGBA8888</string>
+            <key>premultiplyAlpha</key>
+            <false/>
+            <key>realTextureFileName</key>
+            <string>tileset.png</string>
+            <key>size</key>
+            <string>{224,224}</string>
+            <key>smartupdate</key>
+            <string>$TexturePacker:SmartUpdate:f54a8835575e947601d260b64214bb3d:7be36ebf7405df8a8bc5693a6f111488:a0215f4d3fb45fa121a02d2da241ba16$</string>
+            <key>textureFileName</key>
+            <string>tileset.png</string>
+        </dict>
+    </dict>
+</plist>

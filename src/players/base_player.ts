@@ -9,13 +9,15 @@ enum PlayerStates {
 
 class BasePlayer extends Entity
 {
+    public currentInputState: PlayerInputsState;
+
     protected stateMachine:StateMachine<BasePlayer>;
 
-    private sprite:Phaser.GameObjects.Sprite;
-    public currentInputState: PlayerInputsState;
-    private inputFramesBehind:number;
+    protected inputFramesBehind:number;
 
-    constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, inputFramesBehind:number, anim:string) {
+    private sprite:Phaser.GameObjects.Sprite;
+
+    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, inputFramesBehind:number, anim:string) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x, spawnPosition.y - 16, 16, 16));
         this.inputFramesBehind = inputFramesBehind;
 

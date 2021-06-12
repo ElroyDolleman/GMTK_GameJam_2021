@@ -30,7 +30,7 @@ var config = {
     height: 320,
     scaleMode: 3,
     pixelArt: true,
-    backgroundColor: '#52323a',
+    backgroundColor: '#333333',
     parent: 'GMTK Game Jam 2021',
     title: "GMTK Game Jam 2021",
     version: "0.0.1",
@@ -102,11 +102,23 @@ class CollisionManager {
 }
 class CollisionUtil {
     constructor() { }
-    static hitboxVerticallyAligned(topHitbox, bottomHitbox) {
+    static hitboxVerticallyAligned(topHitbox, bottomHitbox, margin = 0) {
         if (bottomHitbox.top == topHitbox.bottom) {
             return topHitbox.right > bottomHitbox.left && topHitbox.left < bottomHitbox.right;
         }
         return false;
+    }
+    static hitboxHorizontallyAligned(leftHitbox, rightHitbox, margin = 0) {
+        if (leftHitbox.right == rightHitbox.left) {
+            return leftHitbox.bottom > rightHitbox.top && leftHitbox.top < rightHitbox.bottom;
+        }
+        return false;
+    }
+    static hitboxesAligned(hitbox1, hitbox2) {
+        return CollisionUtil.hitboxVerticallyAligned(hitbox1, hitbox2) ||
+            CollisionUtil.hitboxVerticallyAligned(hitbox2, hitbox1) ||
+            CollisionUtil.hitboxHorizontallyAligned(hitbox1, hitbox2) ||
+            CollisionUtil.hitboxHorizontallyAligned(hitbox2, hitbox1);
     }
 }
 let TILE_WIDTH = 16;
@@ -266,12 +278,12 @@ class LevelLoader {
         let levelJson = this.jsonData[name];
         let tilesetJson = this.jsonData['tilesets_data'][levelJson['tileset_name']];
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
-        let player2 = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60, 'firechar-walk_00.png');
-        level.addEntity(player2);
-        level.addCollidable(player2);
-        let player = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 0, 'icechar-walk_00.png');
-        level.addEntity(player);
-        level.addCollidable(player);
+        let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60);
+        level.addEntity(firePlayer);
+        level.addCollidable(firePlayer);
+        let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(64, 288 - 16), 0);
+        level.addEntity(icePlayer);
+        level.addCollidable(icePlayer);
         return level;
     }
     createTilemap(levelJson, tilesetJson) {
@@ -320,6 +332,18 @@ class LevelLoader {
         if (tiletypes['solid'].indexOf(tileId) >= 0) {
             return TileType.Solid;
         }
+        if (tiletypes['ice'].indexOf(tileId) >= 0) {
+            return TileType.Ice;
+        }
+        if (tiletypes['water'].indexOf(tileId) >= 0) {
+            return TileType.Water;
+        }
+        if (tiletypes['grass'].indexOf(tileId) >= 0) {
+            return TileType.Grass;
+        }
+        if (tiletypes['fire'].indexOf(tileId) >= 0) {
+            return TileType.Fire;
+        }
         return TileType.Empty;
     }
     getRotation(tileId) {
@@ -343,6 +367,10 @@ var TileType;
 (function (TileType) {
     TileType[TileType["Empty"] = 0] = "Empty";
     TileType[TileType["Solid"] = 1] = "Solid";
+    TileType[TileType["Grass"] = 2] = "Grass";
+    TileType[TileType["Ice"] = 3] = "Ice";
+    TileType[TileType["Fire"] = 4] = "Fire";
+    TileType[TileType["Water"] = 5] = "Water";
 })(TileType || (TileType = {}));
 class Tile {
     //private debug:Phaser.GameObjects.Graphics;
@@ -358,7 +386,7 @@ class Tile {
         //     this.debug.fillRectShape(hitbox);
         // }
     }
-    get isSolid() { return this.tiletype == TileType.Solid; }
+    get isSolid() { return this.tiletype == TileType.Solid || this.tiletype == TileType.Ice; }
     get canStandOn() { return this.isSolid; }
     makeEmpty() {
         this.tiletype = TileType.Empty;
@@ -492,6 +520,29 @@ class BasePlayer extends Entity {
         else {
             this.speed.x -= deceleration * NumberUtil.sign(this.speed.x);
         }
+    }
+}
+class FirePlayer extends BasePlayer {
+    constructor(scene, spawnPosition, inputFramesBehind) {
+        super(scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60, 'firechar-walk_00.png');
+        this.inputFramesBehind = inputFramesBehind;
+    }
+    onCollisionSolved(result) {
+        super.onCollisionSolved(result);
+        for (let i = 0; i < result.tiles.length; i++) {
+            if (result.tiles[i].tiletype == TileType.Ice) {
+                if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
+                    //TODO: Melt slowly
+                    result.tiles[i].makeEmpty();
+                }
+            }
+        }
+    }
+}
+class IcePlayer extends BasePlayer {
+    constructor(scene, spawnPosition, inputFramesBehind) {
+        super(scene, new Phaser.Math.Vector2(64, 288 - 16), 1 * 60, 'icechar-walk_00.png');
+        this.inputFramesBehind = inputFramesBehind;
     }
 }
 class PlayerAirborneState {

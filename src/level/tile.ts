@@ -1,6 +1,10 @@
 enum TileType {
     Empty,
     Solid,
+    Grass,
+    Ice,
+    Fire,
+    Water,
 }
 
 class Tile
@@ -13,7 +17,7 @@ class Tile
     public position:Phaser.Geom.Point;
     public tiletype:TileType;
 
-    public get isSolid():boolean { return this.tiletype == TileType.Solid }
+    public get isSolid():boolean { return this.tiletype == TileType.Solid || this.tiletype == TileType.Ice; }
     public get canStandOn():boolean { return this.isSolid; }
 
     //private debug:Phaser.GameObjects.Graphics;

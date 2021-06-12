@@ -38,13 +38,13 @@ class LevelLoader {
             this.createTilemap(levelJson, tilesetJson),
         );
 
-        let player2:BasePlayer = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288-16), 1*60, 'firechar-walk_00.png');
-        level.addEntity(player2);
-        level.addCollidable(player2);
+        let firePlayer:FirePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(64, 288-16), 1*60);
+        level.addEntity(firePlayer);
+        level.addCollidable(firePlayer);
 
-        let player:BasePlayer = new BasePlayer(this.scene, new Phaser.Math.Vector2(64, 288-16), 0, 'icechar-walk_00.png');
-        level.addEntity(player);
-        level.addCollidable(player);
+        let icePlayer:IcePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(64, 288-16), 0);
+        level.addEntity(icePlayer);
+        level.addCollidable(icePlayer);
 
         return level;
     }
@@ -106,8 +106,21 @@ class LevelLoader {
         }
 
         let tiletypes = tilesetJson['tiletypes'];
+
         if (tiletypes['solid'].indexOf(tileId) >= 0) {
             return TileType.Solid;
+        }
+        if (tiletypes['ice'].indexOf(tileId) >= 0) {
+            return TileType.Ice;
+        }
+        if (tiletypes['water'].indexOf(tileId) >= 0) {
+            return TileType.Water;
+        }
+        if (tiletypes['grass'].indexOf(tileId) >= 0) {
+            return TileType.Grass;
+        }
+        if (tiletypes['fire'].indexOf(tileId) >= 0) {
+            return TileType.Fire;
         }
 
         return TileType.Empty;
