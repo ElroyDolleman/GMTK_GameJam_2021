@@ -10,7 +10,7 @@
 			"scale": 1,
 			"frames": [
 				{
-					"filename": "firechar-falll_02.png",
+					"filename": "firechar-fall_02.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -388,7 +388,7 @@
 					}
 				},
 				{
-					"filename": "firechar-falll_00.png",
+					"filename": "firechar-fall_00.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -409,7 +409,7 @@
 					}
 				},
 				{
-					"filename": "firechar-falll_01.png",
+					"filename": "firechar-fall_01.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -430,7 +430,7 @@
 					}
 				},
 				{
-					"filename": "firechar-falll_03.png",
+					"filename": "firechar-fall_03.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -1023,6 +1023,6 @@
 	"meta": {
 		"app": "https://www.codeandweb.com/texturepacker",
 		"version": "3.0",
-		"smartupdate": "$TexturePacker:SmartUpdate:fbea6cbcb578f4373614a70db39e6051:0d684fcf1ac2370f8e623a6afe96515d:f479e0c31071cb21388b705d67871d6a$"
+		"smartupdate": "$TexturePacker:SmartUpdate:589163f127c6515252aeb24e6ce8b25f:0d684fcf1ac2370f8e623a6afe96515d:f479e0c31071cb21388b705d67871d6a$"
 	}
 }

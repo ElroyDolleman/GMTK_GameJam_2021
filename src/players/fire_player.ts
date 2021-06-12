@@ -1,7 +1,7 @@
 class FirePlayer extends BasePlayer
 {
     public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates) {
-        super(scene, spawnPosition, startingState, 'firechar-walk_00.png');
+        super(scene, spawnPosition, startingState, new BasePlayerView('firechar'));
     }
 
     onCollisionSolved(result: CollisionResult):void {

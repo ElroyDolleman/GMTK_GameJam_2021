@@ -17,15 +17,16 @@ class BasePlayer extends Entity
 
     protected inputFramesBehind:number;
 
-    private sprite:Phaser.GameObjects.Sprite;
+    //private sprite:Phaser.GameObjects.Sprite;
+    public view:BasePlayerView;
 
-    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates, anim:string) {
+    public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates, view:BasePlayerView) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
 
-        this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
-        this.sprite.setOrigin(0.5, 1);
-        this.sprite.x = spawnPosition.x;
-        this.sprite.y = spawnPosition.y;
+        // this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
+        // this.sprite.setOrigin(0.5, 1);
+        // this.sprite.x = spawnPosition.x;
+        // this.sprite.y = spawnPosition.y;
 
         this.stateMachine = new StateMachine(this);
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
@@ -36,6 +37,10 @@ class BasePlayer extends Entity
         this.stateMachine.addState(PlayerStates.Sleep, new PlayerSleepState());
 
         this.stateMachine.start(startingState);
+
+        this.view = view;
+        this.view.createAnimator(scene, this);
+        this.view.animator.updateSpritePosition();
     }
 
     update():void {
@@ -44,14 +49,13 @@ class BasePlayer extends Entity
     }
 
     wakeUp():void {
-        console.log("wakey wakey");
         if (this.stateMachine.currentStateKey == PlayerStates.Sleep) {
             this.stateMachine.changeState(PlayerStates.Idle);
         }
     }
 
     lateUpdate():void {
-        this.sprite.setPosition(this.hitbox.centerX, this.hitbox.bottom);
+        this.view.update();
     }
 
     onCollisionSolved(result: CollisionResult):void {

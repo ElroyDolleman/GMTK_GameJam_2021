@@ -1,7 +1,7 @@
 class IcePlayer extends BasePlayer
 {
     public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates) {
-        super(scene, spawnPosition, startingState, 'icechar-walk_00.png');
+        super(scene, spawnPosition, startingState, new BasePlayerView('icechar'));
 
         this.solidTileTypes.push(TileTypes.Water);
     }

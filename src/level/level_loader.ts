@@ -54,8 +54,8 @@ class LevelLoader {
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
 
-        icePlayer.getStateMachine().addStateChangedListener(PlayerStates.Sleep, firePlayer.wakeUp, firePlayer);
-        firePlayer.getStateMachine().addStateChangedListener(PlayerStates.Sleep, icePlayer.wakeUp, icePlayer);
+        icePlayer.getStateMachine().addStateChangedListener((state:PlayerStates) => { if (state == PlayerStates.Sleep) firePlayer.wakeUp(); });
+        firePlayer.getStateMachine().addStateChangedListener((state:PlayerStates) => { if (state == PlayerStates.Sleep) icePlayer.wakeUp(); });
 
         return level;
     }

@@ -160,6 +160,76 @@ class CollisionUtil {
 }
 let TILE_WIDTH = 16;
 let TILE_HEIGHT = 16;
+class Animator {
+    constructor(scene, sprite, entity) {
+        this.currentSquish = { timer: 0, startTime: 0, reverseTime: 0, scaleX: 1, scaleY: 1 };
+        this.currentAnimKey = '';
+        this.scene = scene;
+        this.sprite = sprite;
+        this.entity = entity;
+    }
+    get facingDirection() { return this.sprite.flipX ? -1 : 1; }
+    set facingDirection(dir) { this.sprite.flipX = dir < 0; }
+    get isSquishing() { return this.currentSquish.timer > 0; }
+    update() {
+        if (this.isSquishing) {
+            this.updateSquish();
+        }
+    }
+    updateSpritePosition() {
+        this.sprite.setPosition(this.entity.x, this.entity.y);
+    }
+    changeAnimation(key, isSingleFrame = false) {
+        this.currentAnimKey = key;
+        if (isSingleFrame) {
+            this.sprite.anims.stop();
+            this.sprite.setFrame(key);
+        }
+        else {
+            this.sprite.play(key);
+        }
+    }
+    createAnimation(key, texture, prefix, length, frameRate = 16, repeat = -1) {
+        let frameNames = this.scene.anims.generateFrameNames(texture, {
+            prefix: prefix,
+            suffix: '.png',
+            end: length - 1,
+            zeroPad: 2
+        });
+        this.scene.anims.create({
+            key: key,
+            frames: frameNames,
+            frameRate: frameRate,
+            repeat: repeat,
+        });
+    }
+    squish(scaleX, scaleY, duration, reverseTime) {
+        this.currentSquish = {
+            timer: duration,
+            reverseTime: reverseTime == undefined ? duration / 2 : reverseTime,
+            startTime: duration,
+            scaleX: scaleX,
+            scaleY: scaleY
+        };
+    }
+    updateSquish() {
+        this.currentSquish.timer = Math.max(this.currentSquish.timer - TimeUtil.getElapsedMS(), 0);
+        let timeToReverse = this.currentSquish.startTime - this.currentSquish.reverseTime;
+        if (this.currentSquish.timer > timeToReverse) {
+            let t = 1 - (this.currentSquish.timer - timeToReverse) / this.currentSquish.reverseTime;
+            this.sprite.scaleX = Phaser.Math.Linear(1, this.currentSquish.scaleX, t);
+            this.sprite.scaleY = Phaser.Math.Linear(1, this.currentSquish.scaleY, t);
+        }
+        else {
+            let t = 1 - this.currentSquish.timer / timeToReverse;
+            this.sprite.scaleX = Phaser.Math.Linear(this.currentSquish.scaleX, 1, t);
+            this.sprite.scaleY = Phaser.Math.Linear(this.currentSquish.scaleY, 1, t);
+        }
+    }
+    destroy() {
+        this.sprite.destroy();
+    }
+}
 class Entity {
     constructor(hitbox) {
         this._hitbox = hitbox;
@@ -330,8 +400,10 @@ class LevelLoader {
         let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(iceSpawn.x, iceSpawn.y + 16), iceCharState);
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
-        icePlayer.getStateMachine().addStateChangedListener(PlayerStates.Sleep, firePlayer.wakeUp, firePlayer);
-        firePlayer.getStateMachine().addStateChangedListener(PlayerStates.Sleep, icePlayer.wakeUp, icePlayer);
+        icePlayer.getStateMachine().addStateChangedListener((state) => { if (state == PlayerStates.Sleep)
+            firePlayer.wakeUp(); });
+        firePlayer.getStateMachine().addStateChangedListener((state) => { if (state == PlayerStates.Sleep)
+            icePlayer.wakeUp(); });
         return level;
     }
     createTilemap(levelJson, tilesetJson) {
@@ -648,12 +720,12 @@ var PlayerStates;
     PlayerStates[PlayerStates["Sleep"] = 5] = "Sleep";
 })(PlayerStates || (PlayerStates = {}));
 class BasePlayer extends Entity {
-    constructor(scene, spawnPosition, startingState, anim) {
+    constructor(scene, spawnPosition, startingState, view) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
-        this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
-        this.sprite.setOrigin(0.5, 1);
-        this.sprite.x = spawnPosition.x;
-        this.sprite.y = spawnPosition.y;
+        // this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
+        // this.sprite.setOrigin(0.5, 1);
+        // this.sprite.x = spawnPosition.x;
+        // this.sprite.y = spawnPosition.y;
         this.stateMachine = new StateMachine(this);
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
@@ -662,19 +734,21 @@ class BasePlayer extends Entity {
         this.stateMachine.addState(PlayerStates.Crouch, new PlayerCrouchState());
         this.stateMachine.addState(PlayerStates.Sleep, new PlayerSleepState());
         this.stateMachine.start(startingState);
+        this.view = view;
+        this.view.createAnimator(scene, this);
+        this.view.animator.updateSpritePosition();
     }
     update() {
         this.currentInputState = InputManager.instance.playerInputState;
         this.stateMachine.update();
     }
     wakeUp() {
-        console.log("wakey wakey");
         if (this.stateMachine.currentStateKey == PlayerStates.Sleep) {
             this.stateMachine.changeState(PlayerStates.Idle);
         }
     }
     lateUpdate() {
-        this.sprite.setPosition(this.hitbox.centerX, this.hitbox.bottom);
+        this.view.update();
     }
     onCollisionSolved(result) {
         this.stateMachine.currentState.onCollisionSolved(result);
@@ -712,9 +786,55 @@ class BasePlayer extends Entity {
         return this.stateMachine;
     }
 }
+class BasePlayerView {
+    constructor(playerName) {
+        this.animationNames = new Map([
+            [PlayerStates.Idle, 'idle'],
+            [PlayerStates.Walk, 'walk'],
+            [PlayerStates.Jump, 'jump'],
+            [PlayerStates.Fall, 'fall'],
+            [PlayerStates.Crouch, 'crouch'],
+            [PlayerStates.Sleep, 'sleep'],
+        ]);
+        this.textureKey = 'player_sheet';
+        this.playerName = playerName;
+    }
+    createAnimator(scene, player) {
+        this.player = player;
+        this.sprite = scene.add.sprite(0, 0, this.textureKey, this.playerName + '-idle_00.png');
+        this.sprite.setOrigin(0.5, 1);
+        this.animator = new Animator(scene, this.sprite, this.player);
+        this.createStateAnimation(PlayerStates.Idle);
+        this.createStateAnimation(PlayerStates.Walk);
+        this.createStateAnimation(PlayerStates.Jump);
+        this.createStateAnimation(PlayerStates.Fall);
+        this.createStateAnimation(PlayerStates.Crouch);
+        this.createStateAnimation(PlayerStates.Sleep);
+        this.changeStateAnimation(player.getStateMachine().currentStateKey);
+        this.player.getStateMachine().addStateChangedListener(this.changeStateAnimation, this);
+    }
+    update() {
+        if (this.player.speed.x > 0) {
+            this.animator.facingDirection = 1;
+        }
+        else if (this.player.speed.x < 0) {
+            this.animator.facingDirection = -1;
+        }
+        this.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.bottom);
+        this.animator.update();
+    }
+    createStateAnimation(state) {
+        let key = this.animationNames.get(state);
+        console.log(this.playerName + key);
+        this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', 4);
+    }
+    changeStateAnimation(state) {
+        this.animator.changeAnimation(this.playerName + this.animationNames.get(state));
+    }
+}
 class FirePlayer extends BasePlayer {
     constructor(scene, spawnPosition, startingState) {
-        super(scene, spawnPosition, startingState, 'firechar-walk_00.png');
+        super(scene, spawnPosition, startingState, new BasePlayerView('firechar'));
     }
     onCollisionSolved(result) {
         super.onCollisionSolved(result);
@@ -743,7 +863,7 @@ class FirePlayer extends BasePlayer {
 }
 class IcePlayer extends BasePlayer {
     constructor(scene, spawnPosition, startingState) {
-        super(scene, spawnPosition, startingState, 'icechar-walk_00.png');
+        super(scene, spawnPosition, startingState, new BasePlayerView('icechar'));
         this.solidTileTypes.push(TileTypes.Water);
     }
     onCollisionSolved(result) {
@@ -756,6 +876,8 @@ class IcePlayer extends BasePlayer {
             }
         }
     }
+}
+class IcePlayerView {
 }
 var PlayerStats;
 (function (PlayerStats) {
@@ -976,10 +1098,10 @@ class StateMachine {
         this.currentState.leave();
         this.currentStateKey = key;
         this.currentState.enter();
-        this.onStateChanged.emit(key.toString());
+        this.onStateChanged.emit('state-changed', key);
     }
-    addStateChangedListener(stateKey, event, context) {
-        this.onStateChanged.addListener(stateKey.toString(), event, context);
+    addStateChangedListener(event, context) {
+        this.onStateChanged.addListener('state-changed', event, context);
     }
 }
 var NumberUtil;

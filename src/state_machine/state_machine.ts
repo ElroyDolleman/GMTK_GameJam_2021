@@ -32,10 +32,10 @@ class StateMachine<T>
         this.currentStateKey = key;
         this.currentState.enter();
 
-        this.onStateChanged.emit(key.toString());
+        this.onStateChanged.emit('state-changed', key);
     }
 
-    public addStateChangedListener(stateKey:number, event:Function, context?:any) {
-        this.onStateChanged.addListener(stateKey.toString(), event, context);
+    public addStateChangedListener(event:Function, context?:any) {
+        this.onStateChanged.addListener('state-changed', event, context);
     }
 }
