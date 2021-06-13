@@ -260,6 +260,27 @@
 						"w": 4,
 						"h": 4
 					}
+				},
+				{
+					"filename": "sparkle_00.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 4,
+						"h": 4
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 4,
+						"h": 4
+					},
+					"frame": {
+						"x": 10,
+						"y": 44,
+						"w": 4,
+						"h": 4
+					}
 				}
 			]
 		}
@@ -267,6 +288,6 @@
 	"meta": {
 		"app": "https://www.codeandweb.com/texturepacker",
 		"version": "3.0",
-		"smartupdate": "$TexturePacker:SmartUpdate:f3d696611d87b0c7050ecc4d2aadf477:43c53239607e457fcb5e35eff0a45dbe:d9a1619995873c28774d593c93e55330$"
+		"smartupdate": "$TexturePacker:SmartUpdate:200e25a516c101bd91a5f3e4cc447960:2bfa1f8e031feb28d7d263340d0cf782:d9a1619995873c28774d593c93e55330$"
 	}
 }

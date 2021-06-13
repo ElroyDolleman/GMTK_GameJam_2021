@@ -72,6 +72,11 @@ class Tile
         this.tileId = newTileId;
         this.tiletype = tiletype;
 
+        if (this.particleEmitter) {
+            ParticleManager.removeEmitter(this.particleEmitter);
+            this.particleEmitter = null;
+        }
+
         switch(tiletype) {
             case TileTypes.Fire:
                 this.particleEmitter = ParticleManager.createEmitter({
@@ -87,12 +92,22 @@ class Tile
                 });
                 this.particleEmitter.setTint(0xFF0000);
                 break;
-            default:
-                if (this.particleEmitter) {
-                    ParticleManager.removeEmitter(this.particleEmitter);
-                    this.particleEmitter = null;
-                }
+            case TileTypes.GoldTorch:
+                this.particleEmitter = ParticleManager.createEmitter({
+                    x: this.hitbox.centerX,
+                    y: this.hitbox.top,
+                    lifespan: { min: 300, max: 400 },
+                    speed: { min: 32, max: 48 },
+                    angle: { min: 270-28, max: 270+28 },
+                    scale: { start: 0.1, end: 1, ease: 'Cubic' },
+                    alpha: { start: 1, end: 0.12, ease: 'Quint' },
+                    frequency: 32,
+                    emitZone: { source: new Phaser.Geom.Rectangle(-6, 0, 12, 1) },
+                    frame: 'sparkle_00.png',
+                });
+                this.particleEmitter.setTint(0xf7ec8a);
                 break;
+            break
         }
     }
 
