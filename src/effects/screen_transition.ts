@@ -3,6 +3,8 @@ class ScreenTransition {
     private graphics: Phaser.GameObjects.Graphics;
     private scene:Phaser.Scene;
 
+    public get isActive():boolean { return this.graphics.visible; };
+
     constructor(scene:Phaser.Scene) {
         this.scene = scene;
 

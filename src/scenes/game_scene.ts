@@ -50,6 +50,19 @@ class GameScene extends Phaser.Scene
 
             this.startLevel(this.currentLevelNumber);
         }, this);
+
+        //Reset level
+        this.input.keyboard.on('keyup-R', () => {
+            if (this.isGameOver || this.screenTransition.isActive) {
+                return;
+            }
+            if (this.icePlayer) {
+                this.icePlayer.die();
+            }
+            if (this.firePlayer) {
+                this.firePlayer.die();
+            }
+        });
     }
 
     update() {

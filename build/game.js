@@ -29,6 +29,17 @@ class GameScene extends Phaser.Scene {
             AudioManager.playMusic(this);
             this.startLevel(this.currentLevelNumber);
         }, this);
+        this.input.keyboard.on('keyup-R', () => {
+            if (this.isGameOver || this.screenTransition.isActive) {
+                return;
+            }
+            if (this.icePlayer) {
+                this.icePlayer.die();
+            }
+            if (this.firePlayer) {
+                this.firePlayer.die();
+            }
+        });
     }
     update() {
         InputManager.instance.update();
@@ -347,6 +358,8 @@ class ScreenTransition {
         this.scene = scene;
         this.createGraphics();
     }
+    get isActive() { return this.graphics.visible; }
+    ;
     createGraphics() {
         this.graphics = this.scene.add.graphics({
             lineStyle: { width: 2, color: 0x0 },
