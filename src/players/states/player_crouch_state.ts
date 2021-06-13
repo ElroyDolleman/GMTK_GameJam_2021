@@ -31,6 +31,8 @@ class PlayerCrouchState extends PlayerGroundedState
                     this.machine.owner.isAtGoal = true;
                 }
 
+                AudioManager.sounds.torch.play({ volume:0.3 });
+
                 this.machine.changeState(PlayerStates.Sleep);
                 break;
             }

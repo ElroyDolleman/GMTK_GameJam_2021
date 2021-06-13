@@ -135,7 +135,7 @@ class Tile
                         this.hitbox.x,//RandomUtil.randomFloat(this.hitbox.x, this.hitbox.x + this.hitbox.width),
                         this.hitbox.y,//RandomUtil.randomFloat(this.hitbox.y, this.hitbox.y + this.hitbox.height)
                     );
-                    AudioManager.sounds.freeze.play({volume: 0.3});
+                    AudioManager.sounds.freeze.play({volume: 0.24});
                 }
                 break;
         }

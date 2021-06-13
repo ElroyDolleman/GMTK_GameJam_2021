@@ -18,6 +18,8 @@ class AudioManager {
         scene.load.audio('fire', 'audio/fire.wav');
         scene.load.audio('ice', 'audio/ice.wav');
         scene.load.audio('dead', 'audio/dead.wav');
+        scene.load.audio('torch', 'audio/torch.wav');
+        scene.load.audio('melt', 'audio/melt.wav');
         scene.load.audio('background_music', 'audio/6_Town_2_Master.ogg');
     }
 
@@ -27,6 +29,8 @@ class AudioManager {
             fire: scene.sound.add('fire', this.defaultConfig),
             freeze: scene.sound.add('ice', this.defaultConfig),
             dead: scene.sound.add('dead', this.defaultConfig),
+            torch: scene.sound.add('torch', this.defaultConfig),
+            melt: scene.sound.add('melt', this.defaultConfig),
         };
         // let test:Phaser.Sound.BaseSound;
         // test.play()
@@ -47,7 +51,7 @@ class AudioManager {
     private static startMusic(scene:Phaser.Scene) {
         let music = scene.sound.add('background_music', {
             mute: false,
-            volume: 0.2,
+            volume: 0.1,
             rate: 1,
             detune: 0,
             seek: 0,

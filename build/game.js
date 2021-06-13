@@ -141,6 +141,8 @@ class AudioManager {
         scene.load.audio('fire', 'audio/fire.wav');
         scene.load.audio('ice', 'audio/ice.wav');
         scene.load.audio('dead', 'audio/dead.wav');
+        scene.load.audio('torch', 'audio/torch.wav');
+        scene.load.audio('melt', 'audio/melt.wav');
         scene.load.audio('background_music', 'audio/6_Town_2_Master.ogg');
     }
     static createAllSounds(scene) {
@@ -149,6 +151,8 @@ class AudioManager {
             fire: scene.sound.add('fire', this.defaultConfig),
             freeze: scene.sound.add('ice', this.defaultConfig),
             dead: scene.sound.add('dead', this.defaultConfig),
+            torch: scene.sound.add('torch', this.defaultConfig),
+            melt: scene.sound.add('melt', this.defaultConfig),
         };
         // let test:Phaser.Sound.BaseSound;
         // test.play()
@@ -166,7 +170,7 @@ class AudioManager {
     static startMusic(scene) {
         let music = scene.sound.add('background_music', {
             mute: false,
-            volume: 0.2,
+            volume: 0.1,
             rate: 1,
             detune: 0,
             seek: 0,
@@ -800,7 +804,7 @@ class Tile {
                 if (this.originalTiletype == TileTypes.Water) {
                     this.particleEmitter.explode(10, this.hitbox.x, //RandomUtil.randomFloat(this.hitbox.x, this.hitbox.x + this.hitbox.width),
                     this.hitbox.y);
-                    AudioManager.sounds.freeze.play({ volume: 0.3 });
+                    AudioManager.sounds.freeze.play({ volume: 0.24 });
                 }
                 break;
         }
@@ -1232,7 +1236,7 @@ class FirePlayer extends BasePlayer {
             if (result.tiles[i].tiletype == TileTypes.Ice) {
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
                     if (!result.tiles[i].sprite.anims.isPlaying) {
-                        //AudioManager.sounds.melt.play();
+                        AudioManager.sounds.melt.play({ volume: 0.2 });
                         TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
                             if (result.tiles[i].originalTiletype == TileTypes.Ice) {
                                 result.tiles[i].makeEmpty();
@@ -1247,7 +1251,7 @@ class FirePlayer extends BasePlayer {
             else if (result.tiles[i].tiletype == TileTypes.Grass) {
                 if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
                     TilesetManager.changeTileType(result.tiles[i], TileTypes.Fire);
-                    AudioManager.sounds.fire.play({ volume: 0.3 });
+                    AudioManager.sounds.fire.play({ volume: 0.24 });
                 }
             }
             else if (result.tiles[i].tiletype == TileTypes.Water && this.stateMachine.currentStateKey != PlayerStates.Dead) {
@@ -1375,6 +1379,7 @@ class PlayerCrouchState extends PlayerGroundedState {
                 if (result.tiles[i].tiletype == TileTypes.GoldTorch) {
                     this.machine.owner.isAtGoal = true;
                 }
+                AudioManager.sounds.torch.play({ volume: 0.3 });
                 this.machine.changeState(PlayerStates.Sleep);
                 break;
             }
