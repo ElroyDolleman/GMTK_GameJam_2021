@@ -6,27 +6,19 @@ enum PlayerStates {
     Fall,
     Jump,
     Crouch,
-    Sleep
+    Sleep,
+    Dead,
 }
 
 class BasePlayer extends Entity
 {
-    public currentInputState:PlayerInputsState;
-
     protected stateMachine:StateMachine<BasePlayer>;
-
-    protected inputFramesBehind:number;
-
-    //private sprite:Phaser.GameObjects.Sprite;
     public view:BasePlayerView;
+
+    public currentInputState:PlayerInputsState;
 
     public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates, view:BasePlayerView) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
-
-        // this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
-        // this.sprite.setOrigin(0.5, 1);
-        // this.sprite.x = spawnPosition.x;
-        // this.sprite.y = spawnPosition.y;
 
         this.stateMachine = new StateMachine(this);
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
@@ -35,6 +27,7 @@ class BasePlayer extends Entity
         this.stateMachine.addState(PlayerStates.Jump, new PlayerJumpState());
         this.stateMachine.addState(PlayerStates.Crouch, new PlayerCrouchState());
         this.stateMachine.addState(PlayerStates.Sleep, new PlayerSleepState());
+        this.stateMachine.addState(PlayerStates.Dead, new PlayerDeadState());
 
         this.stateMachine.start(startingState);
 
@@ -59,6 +52,11 @@ class BasePlayer extends Entity
     }
 
     onCollisionSolved(result: CollisionResult):void {
+        if (result.isDamaged && this.stateMachine.currentStateKey != PlayerStates.Dead) {
+            this.speed.x = 0;
+            this.stateMachine.changeState(PlayerStates.Dead);
+        }
+
         this.stateMachine.currentState.onCollisionSolved(result);
     }
 
@@ -95,5 +93,10 @@ class BasePlayer extends Entity
 
     public getStateMachine():StateMachine<BasePlayer> {
         return this.stateMachine;
+    }
+
+    public destroy():void {
+        this.stateMachine.destroy();
+        this.view.destroy();
     }
 }

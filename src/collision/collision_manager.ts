@@ -38,6 +38,10 @@ class CollisionManager {
             if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveHorizontalCollision(tiles[i], collidable, result);
             }
+
+            else if (!result.isDamaged && collidable.damageTileTypes.indexOf(tiles[i].tiletype) >= 0) {
+                result.isDamaged = true;
+            }
         }
 
         collidable.moveY();
@@ -56,6 +60,10 @@ class CollisionManager {
 
             else if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveVerticalCollision(tiles[i], collidable, result);
+            }
+
+            else if (!result.isDamaged && collidable.damageTileTypes.indexOf(tiles[i].tiletype) >= 0) {
+                result.isDamaged = true;
             }
         }
 

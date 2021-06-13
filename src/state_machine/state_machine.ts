@@ -38,4 +38,9 @@ class StateMachine<T>
     public addStateChangedListener(event:Function, context?:any) {
         this.onStateChanged.addListener('state-changed', event, context);
     }
+
+    public destroy() {
+        this.onStateChanged.destroy();
+        this.states.clear();
+    }
 }

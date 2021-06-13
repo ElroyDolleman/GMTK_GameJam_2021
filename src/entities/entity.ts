@@ -2,6 +2,7 @@ abstract class Entity implements ICollidable {
 
     public speed:Phaser.Math.Vector2;
     public solidTileTypes:TileTypes[];
+    public damageTileTypes:TileTypes[];
 
     private _hitbox:Phaser.Geom.Rectangle;
     public get hitbox():Phaser.Geom.Rectangle {
@@ -29,7 +30,9 @@ abstract class Entity implements ICollidable {
     constructor(hitbox:Phaser.Geom.Rectangle) {
         this._hitbox = hitbox;
         this.speed = new Phaser.Math.Vector2();
+
         this.solidTileTypes = [];
+        this.damageTileTypes = [];
     }
 
     abstract update():void;
@@ -41,6 +44,8 @@ abstract class Entity implements ICollidable {
     public moveY() {
         this._hitbox.y += this.speed.y * TimeUtil.getElapsed();
     }
+
+    abstract destroy():void;
 
     abstract onCollisionSolved(result:CollisionResult):void
 }

@@ -4,6 +4,8 @@ class IcePlayer extends BasePlayer
         super(scene, spawnPosition, startingState, new BasePlayerView('icechar'));
 
         this.solidTileTypes.push(TileTypes.Water);
+
+        this.damageTileTypes.push(TileTypes.Fire);
     }
 
     onCollisionSolved(result: CollisionResult):void {

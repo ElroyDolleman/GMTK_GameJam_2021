@@ -1,6 +1,7 @@
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene', active: true });
+        this.isGameOver = false;
     }
     init() {
         this.levelLoader = new LevelLoader(this);
@@ -14,11 +15,53 @@ class GameScene extends Phaser.Scene {
     create() {
         InputManager.instance.initialize(this);
         this.levelLoader.init();
-        this.currentLevel = this.levelLoader.create("playground");
+        this.screenTransition = new ScreenTransition(this);
+        this.reloadLevel();
     }
     update() {
         InputManager.instance.update();
         this.currentLevel.update();
+    }
+    reloadLevel() {
+        if (this.currentLevel) {
+            this.currentLevel.destroy();
+        }
+        this.isGameOver = false;
+        this.startingPlayers = [];
+        this.currentLevel = this.levelLoader.create("playground");
+        this.icePlayer.getStateMachine().addStateChangedListener(this.icePlayerStateChanged, this);
+        this.firePlayer.getStateMachine().addStateChangedListener(this.firePlayerStateChanged, this);
+        this.screenTransition.onLevelEnter(() => {
+            this.startingPlayers.forEach((player) => {
+                player.wakeUp();
+            });
+        }, this);
+    }
+    firePlayerStateChanged(state) {
+        switch (state) {
+            case PlayerStates.Sleep:
+                this.icePlayer.wakeUp();
+                break;
+            case PlayerStates.Dead:
+                this.gameOver();
+                break;
+        }
+    }
+    icePlayerStateChanged(state) {
+        switch (state) {
+            case PlayerStates.Sleep:
+                this.firePlayer.wakeUp();
+                break;
+            case PlayerStates.Dead:
+                this.gameOver();
+                break;
+        }
+    }
+    gameOver() {
+        if (!this.isGameOver) {
+            this.isGameOver = true;
+            this.screenTransition.onLevelClose(this.reloadLevel, this);
+        }
     }
     draw() {
     }
@@ -91,6 +134,9 @@ class CollisionManager {
             if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveHorizontalCollision(tiles[i], collidable, result);
             }
+            else if (!result.isDamaged && collidable.damageTileTypes.indexOf(tiles[i].tiletype) >= 0) {
+                result.isDamaged = true;
+            }
         }
         collidable.moveY();
         for (let i = 0; i < tiles.length; i++) {
@@ -105,6 +151,9 @@ class CollisionManager {
             }
             else if (tiles[i].isSolid || collidable.solidTileTypes.indexOf(tiles[i].tiletype) >= 0) {
                 this.solveVerticalCollision(tiles[i], collidable, result);
+            }
+            else if (!result.isDamaged && collidable.damageTileTypes.indexOf(tiles[i].tiletype) >= 0) {
+                result.isDamaged = true;
             }
         }
         collidable.onCollisionSolved(result);
@@ -160,6 +209,58 @@ class CollisionUtil {
 }
 let TILE_WIDTH = 16;
 let TILE_HEIGHT = 16;
+class ScreenTransition {
+    constructor(scene) {
+        this.scene = scene;
+        this.createGraphics();
+    }
+    createGraphics() {
+        this.graphics = this.scene.add.graphics({
+            lineStyle: { width: 2, color: 0x0 },
+            fillStyle: { color: 0x0, alpha: 1 }
+        });
+        this.graphics.depth = 7;
+        this.graphics.clear();
+        let left = -10;
+        let right = 380;
+        let points = [{ x: left, y: 0 }];
+        for (let y = 320 / 8; y <= 320; y += 320 / 8) {
+            points.push({ x: left, y });
+            left -= 20;
+            points.push({ x: left - 18, y });
+        }
+        for (let y = 320; y >= 0; y -= 320 / 8) {
+            points.push({ x: right, y });
+            right += 20;
+            points.push({ x: right + 18, y });
+        }
+        this.graphics.fillPoints(points);
+        this.graphics.x = 0;
+    }
+    onLevelEnter(onDone, context) {
+        this.scene.tweens.add({
+            targets: this.graphics,
+            props: {
+                x: { value: -560, duration: 750, ease: 'Linear' },
+            },
+            onComplete: () => {
+                this.graphics.x = 560;
+                this.graphics.setVisible(false);
+                onDone.call(context);
+            }
+        });
+    }
+    onLevelClose(onDone, context) {
+        this.graphics.setVisible(true);
+        this.scene.tweens.add({
+            targets: this.graphics,
+            props: {
+                x: { value: 0, duration: 750, ease: 'Linear', delay: 250 },
+            },
+            onComplete: onDone.bind(context)
+        });
+    }
+}
 class Animator {
     constructor(scene, sprite, entity) {
         this.currentSquish = { timer: 0, startTime: 0, reverseTime: 0, scaleX: 1, scaleY: 1 };
@@ -235,6 +336,7 @@ class Entity {
         this._hitbox = hitbox;
         this.speed = new Phaser.Math.Vector2();
         this.solidTileTypes = [];
+        this.damageTileTypes = [];
     }
     get hitbox() {
         return this._hitbox;
@@ -359,6 +461,13 @@ class Level {
         this.entities.push(entity);
     }
     destroy() {
+        this.map.destroy();
+        TimeManager.tileAnimations.clear();
+        for (let i = 0; i < this.entities.length; i++) {
+            this.entities[i].destroy();
+        }
+        this.entities.splice(0, this.entities.length);
+        this.collidables.splice(0, this.collidables.length);
     }
 }
 const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
@@ -391,8 +500,8 @@ class LevelLoader {
         TilesetManager.tilesetName = levelJson['tileset_name'];
         let iceSpawn = levelJson['ice_spawn'];
         let fireSpawn = levelJson['fire_spawn'];
-        let fireCharState = fireSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
-        let iceCharState = iceSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
+        let fireCharState = PlayerStates.Sleep; //fireSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
+        let iceCharState = PlayerStates.Sleep; //iceSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
         let level = new Level(this.scene, this.createTilemap(levelJson, tilesetJson));
         let firePlayer = new FirePlayer(this.scene, new Phaser.Math.Vector2(fireSpawn.x, fireSpawn.y + 16), fireCharState);
         level.addEntity(firePlayer);
@@ -400,10 +509,12 @@ class LevelLoader {
         let icePlayer = new IcePlayer(this.scene, new Phaser.Math.Vector2(iceSpawn.x, iceSpawn.y + 16), iceCharState);
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
-        icePlayer.getStateMachine().addStateChangedListener((state) => { if (state == PlayerStates.Sleep)
-            firePlayer.wakeUp(); });
-        firePlayer.getStateMachine().addStateChangedListener((state) => { if (state == PlayerStates.Sleep)
-            icePlayer.wakeUp(); });
+        this.scene.icePlayer = icePlayer;
+        this.scene.firePlayer = firePlayer;
+        if (!fireSpawn.sleep)
+            this.scene.startingPlayers.push(firePlayer);
+        if (!iceSpawn.sleep)
+            this.scene.startingPlayers.push(icePlayer);
         return level;
     }
     createTilemap(levelJson, tilesetJson) {
@@ -718,14 +829,11 @@ var PlayerStates;
     PlayerStates[PlayerStates["Jump"] = 3] = "Jump";
     PlayerStates[PlayerStates["Crouch"] = 4] = "Crouch";
     PlayerStates[PlayerStates["Sleep"] = 5] = "Sleep";
+    PlayerStates[PlayerStates["Dead"] = 6] = "Dead";
 })(PlayerStates || (PlayerStates = {}));
 class BasePlayer extends Entity {
     constructor(scene, spawnPosition, startingState, view) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
-        // this.sprite = scene.add.sprite(0, 0, 'player_sheet', anim);
-        // this.sprite.setOrigin(0.5, 1);
-        // this.sprite.x = spawnPosition.x;
-        // this.sprite.y = spawnPosition.y;
         this.stateMachine = new StateMachine(this);
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
@@ -733,6 +841,7 @@ class BasePlayer extends Entity {
         this.stateMachine.addState(PlayerStates.Jump, new PlayerJumpState());
         this.stateMachine.addState(PlayerStates.Crouch, new PlayerCrouchState());
         this.stateMachine.addState(PlayerStates.Sleep, new PlayerSleepState());
+        this.stateMachine.addState(PlayerStates.Dead, new PlayerDeadState());
         this.stateMachine.start(startingState);
         this.view = view;
         this.view.createAnimator(scene, this);
@@ -751,6 +860,10 @@ class BasePlayer extends Entity {
         this.view.update();
     }
     onCollisionSolved(result) {
+        if (result.isDamaged && this.stateMachine.currentStateKey != PlayerStates.Dead) {
+            this.speed.x = 0;
+            this.stateMachine.changeState(PlayerStates.Dead);
+        }
         this.stateMachine.currentState.onCollisionSolved(result);
     }
     updateMovementControls(maxRunSpeed = PlayerStats.RunSpeed, runAcceleration = PlayerStats.RunAcceleration) {
@@ -785,6 +898,10 @@ class BasePlayer extends Entity {
     getStateMachine() {
         return this.stateMachine;
     }
+    destroy() {
+        this.stateMachine.destroy();
+        this.view.destroy();
+    }
 }
 class BasePlayerView {
     constructor(playerName) {
@@ -795,6 +912,7 @@ class BasePlayerView {
             [PlayerStates.Fall, 'fall'],
             [PlayerStates.Crouch, 'crouch'],
             [PlayerStates.Sleep, 'sleep'],
+            [PlayerStates.Dead, 'dead'],
         ]);
         this.textureKey = 'player_sheet';
         this.playerName = playerName;
@@ -810,6 +928,7 @@ class BasePlayerView {
         this.createStateAnimation(PlayerStates.Fall);
         this.createStateAnimation(PlayerStates.Crouch);
         this.createStateAnimation(PlayerStates.Sleep);
+        this.createStateAnimation(PlayerStates.Dead, 5, 10, 0);
         this.changeStateAnimation(player.getStateMachine().currentStateKey);
         this.player.getStateMachine().addStateChangedListener(this.changeStateAnimation, this);
     }
@@ -823,18 +942,21 @@ class BasePlayerView {
         this.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.bottom);
         this.animator.update();
     }
-    createStateAnimation(state) {
+    createStateAnimation(state, length = 4, frameRate, repeat) {
         let key = this.animationNames.get(state);
-        console.log(this.playerName + key);
-        this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', 4);
+        this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', length, frameRate, repeat);
     }
     changeStateAnimation(state) {
         this.animator.changeAnimation(this.playerName + this.animationNames.get(state));
+    }
+    destroy() {
+        this.animator.destroy();
     }
 }
 class FirePlayer extends BasePlayer {
     constructor(scene, spawnPosition, startingState) {
         super(scene, spawnPosition, startingState, new BasePlayerView('firechar'));
+        this.damageTileTypes.push(TileTypes.Water);
     }
     onCollisionSolved(result) {
         super.onCollisionSolved(result);
@@ -865,6 +987,7 @@ class IcePlayer extends BasePlayer {
     constructor(scene, spawnPosition, startingState) {
         super(scene, spawnPosition, startingState, new BasePlayerView('icechar'));
         this.solidTileTypes.push(TileTypes.Water);
+        this.damageTileTypes.push(TileTypes.Fire);
     }
     onCollisionSolved(result) {
         super.onCollisionSolved(result);
@@ -982,6 +1105,18 @@ class PlayerCrouchState extends PlayerGroundedState {
             }
         }
         return false;
+    }
+}
+class PlayerDeadState {
+    constructor() {
+    }
+    enter() {
+    }
+    update() {
+    }
+    leave() {
+    }
+    onCollisionSolved(result) {
     }
 }
 class PlayerFallState extends PlayerAirborneState {
@@ -1102,6 +1237,10 @@ class StateMachine {
     }
     addStateChangedListener(event, context) {
         this.onStateChanged.addListener('state-changed', event, context);
+    }
+    destroy() {
+        this.onStateChanged.destroy();
+        this.states.clear();
     }
 }
 var NumberUtil;

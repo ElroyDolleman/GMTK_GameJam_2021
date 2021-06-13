@@ -33,6 +33,14 @@ class Level
     }
 
     public destroy() {
+        this.map.destroy();
 
+        TimeManager.tileAnimations.clear();
+
+        for (let i = 0; i < this.entities.length; i++) {
+            this.entities[i].destroy();
+        }
+        this.entities.splice(0, this.entities.length);
+        this.collidables.splice(0, this.collidables.length);
     }
 }

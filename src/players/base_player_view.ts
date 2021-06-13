@@ -14,6 +14,7 @@ class BasePlayerView {
         [PlayerStates.Fall, 'fall'],
         [PlayerStates.Crouch, 'crouch'],
         [PlayerStates.Sleep, 'sleep'],
+        [PlayerStates.Dead, 'dead'],
     ]);
     private readonly textureKey:string = 'player_sheet';
 
@@ -35,6 +36,7 @@ class BasePlayerView {
         this.createStateAnimation(PlayerStates.Fall);
         this.createStateAnimation(PlayerStates.Crouch);
         this.createStateAnimation(PlayerStates.Sleep);
+        this.createStateAnimation(PlayerStates.Dead, 5, 10, 0);
 
         this.changeStateAnimation(player.getStateMachine().currentStateKey);
 
@@ -52,13 +54,16 @@ class BasePlayerView {
         this.animator.update();
     }
 
-    private createStateAnimation(state:PlayerStates) {
+    private createStateAnimation(state:PlayerStates, length:number = 4, frameRate?:number, repeat?:number) {
         let key = this.animationNames.get(state);
-        console.log(this.playerName + key);
-        this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', 4);
+        this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', length, frameRate, repeat);
     }
 
     public changeStateAnimation(state:PlayerStates) {
         this.animator.changeAnimation(this.playerName + this.animationNames.get(state));
+    }
+
+    public destroy() {
+        this.animator.destroy();
     }
 }

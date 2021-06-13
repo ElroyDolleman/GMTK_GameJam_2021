@@ -6,8 +6,8 @@ class LevelLoader {
 
     private jsonData:any;
 
-    public readonly scene:Phaser.Scene;
-    constructor(scene:Phaser.Scene) { 
+    public readonly scene:GameScene;
+    constructor(scene:GameScene) { 
         this.scene = scene;
     }
 
@@ -38,8 +38,8 @@ class LevelLoader {
 
         let iceSpawn = levelJson['ice_spawn'];
         let fireSpawn = levelJson['fire_spawn'];
-        let fireCharState:PlayerStates = fireSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
-        let iceCharState:PlayerStates = iceSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
+        let fireCharState:PlayerStates = PlayerStates.Sleep;//fireSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
+        let iceCharState:PlayerStates = PlayerStates.Sleep;//iceSpawn.sleep ? PlayerStates.Sleep : PlayerStates.Idle;
 
         let level = new Level(
             this.scene,
@@ -54,8 +54,10 @@ class LevelLoader {
         level.addEntity(icePlayer);
         level.addCollidable(icePlayer);
 
-        icePlayer.getStateMachine().addStateChangedListener((state:PlayerStates) => { if (state == PlayerStates.Sleep) firePlayer.wakeUp(); });
-        firePlayer.getStateMachine().addStateChangedListener((state:PlayerStates) => { if (state == PlayerStates.Sleep) icePlayer.wakeUp(); });
+        this.scene.icePlayer = icePlayer;
+        this.scene.firePlayer = firePlayer;
+        if (!fireSpawn.sleep) this.scene.startingPlayers.push(firePlayer);
+        if (!iceSpawn.sleep) this.scene.startingPlayers.push(icePlayer);
 
         return level;
     }
