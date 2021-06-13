@@ -28,6 +28,7 @@ class GameScene extends Phaser.Scene
         this.load.atlas('player_sheet', 'assets/player_sheet.png', 'assets/player_sheet.json');
         this.load.atlas('tutorial_sheet', 'assets/tutorial_sheet.png', 'assets/tutorial_sheet.json');
         this.load.atlas('particles_sheet', 'assets/particles_sheet.png', 'assets/particles_sheet.json');
+        this.load.atlas('splash_sheet', 'assets/splash_sheet.png', 'assets/splash_sheet.json');
 
         this.levelLoader.preloadLevelJson();
         this.levelLoader.preloadSpritesheets();
@@ -39,11 +40,16 @@ class GameScene extends Phaser.Scene
         InputManager.instance.initialize(this);
         this.levelLoader.init();
 
-        AudioManager.createAllSounds(this);
-        AudioManager.playMusic(this);
-
         this.screenTransition = new ScreenTransition(this);
-        this.startLevel(this.currentLevelNumber);
+
+        new SplashScreen(this, () => {
+
+            this.cameras.main.setBackgroundColor('#333333');
+            AudioManager.createAllSounds(this);
+            AudioManager.playMusic(this);
+
+            this.startLevel(this.currentLevelNumber);
+        }, this);
     }
 
     update() {

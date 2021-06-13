@@ -12,5 +12,5 @@ SET sourceFolder=%root%\assets\texturepacker\animations\
 SET outputFolder=%root%\build\assets\
 
 FOR /D %%G IN (%sourceFolder%\*) DO (
-    texturepacker %%G --format phaser --data %outputFolder%\%%~nxG_sheet.json --sheet %outputFolder%\%%~nxG_sheet.png --extrude 0 --force-squared --disable-rotation
+    texturepacker %%G --format phaser --data %outputFolder%\%%~nxG_sheet.json --sheet %outputFolder%\%%~nxG_sheet.png --extrude 0 --force-squared --disable-rotation --max-width 4096 --max-height 4096
 )
