@@ -4,8 +4,8 @@
 			"image": "particles_sheet.png",
 			"format": "RGBA8888",
 			"size": {
-				"w": 48,
-				"h": 48
+				"w": 49,
+				"h": 49
 			},
 			"scale": 1,
 			"frames": [
@@ -73,6 +73,27 @@
 					}
 				},
 				{
+					"filename": "dust_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 6,
+						"w": 6,
+						"h": 7
+					},
+					"frame": {
+						"x": 43,
+						"y": 0,
+						"w": 6,
+						"h": 7
+					}
+				},
+				{
 					"filename": "poof_02.png",
 					"rotated": false,
 					"trimmed": true,
@@ -91,6 +112,27 @@
 						"y": 24,
 						"w": 16,
 						"h": 16
+					}
+				},
+				{
+					"filename": "melt_00.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 6,
+						"h": 6
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 6,
+						"h": 6
+					},
+					"frame": {
+						"x": 43,
+						"y": 7,
+						"w": 6,
+						"h": 6
 					}
 				},
 				{
@@ -115,27 +157,6 @@
 					}
 				},
 				{
-					"filename": "dust_00.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 16,
-						"h": 16
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 6,
-						"w": 5,
-						"h": 6
-					},
-					"frame": {
-						"x": 43,
-						"y": 0,
-						"w": 5,
-						"h": 6
-					}
-				},
-				{
 					"filename": "poof_00.png",
 					"rotated": false,
 					"trimmed": true,
@@ -157,27 +178,6 @@
 					}
 				},
 				{
-					"filename": "dust_01.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 16,
-						"h": 16
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 10,
-						"w": 6,
-						"h": 4
-					},
-					"frame": {
-						"x": 0,
-						"y": 44,
-						"w": 6,
-						"h": 4
-					}
-				},
-				{
 					"filename": "dust_04.png",
 					"rotated": false,
 					"trimmed": true,
@@ -192,10 +192,31 @@
 						"h": 5
 					},
 					"frame": {
-						"x": 43,
-						"y": 6,
+						"x": 0,
+						"y": 44,
 						"w": 5,
 						"h": 5
+					}
+				},
+				{
+					"filename": "dust_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 10,
+						"w": 6,
+						"h": 4
+					},
+					"frame": {
+						"x": 43,
+						"y": 13,
+						"w": 6,
+						"h": 4
 					}
 				},
 				{
@@ -220,27 +241,6 @@
 					}
 				},
 				{
-					"filename": "dust_03.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 16,
-						"h": 16
-					},
-					"spriteSourceSize": {
-						"x": 4,
-						"y": 6,
-						"w": 6,
-						"h": 7
-					},
-					"frame": {
-						"x": 28,
-						"y": 40,
-						"w": 6,
-						"h": 7
-					}
-				},
-				{
 					"filename": "flame-particle_00.png",
 					"rotated": false,
 					"trimmed": false,
@@ -255,10 +255,31 @@
 						"h": 4
 					},
 					"frame": {
-						"x": 6,
-						"y": 44,
+						"x": 43,
+						"y": 17,
 						"w": 4,
 						"h": 4
+					}
+				},
+				{
+					"filename": "dust_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 6,
+						"w": 5,
+						"h": 6
+					},
+					"frame": {
+						"x": 28,
+						"y": 40,
+						"w": 5,
+						"h": 6
 					}
 				},
 				{
@@ -276,7 +297,7 @@
 						"h": 4
 					},
 					"frame": {
-						"x": 10,
+						"x": 5,
 						"y": 44,
 						"w": 4,
 						"h": 4
@@ -288,6 +309,6 @@
 	"meta": {
 		"app": "https://www.codeandweb.com/texturepacker",
 		"version": "3.0",
-		"smartupdate": "$TexturePacker:SmartUpdate:200e25a516c101bd91a5f3e4cc447960:2bfa1f8e031feb28d7d263340d0cf782:d9a1619995873c28774d593c93e55330$"
+		"smartupdate": "$TexturePacker:SmartUpdate:0113fc964fe806a7767cdfbee3ddf956:d09c8a59e4dd4ba0bf27e161ae0ef9ee:d9a1619995873c28774d593c93e55330$"
 	}
 }

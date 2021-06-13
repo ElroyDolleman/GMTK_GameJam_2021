@@ -636,6 +636,9 @@ class Tile {
     makeEmpty() {
         this.tiletype = TileTypes.Empty;
         this.sprite.destroy();
+        if (this.particleEmitter) {
+            this.particleEmitter.stop();
+        }
     }
     changeTileId(newTileId, tiletype) {
         if (tiletype != TileTypes.Empty) {
@@ -643,9 +646,12 @@ class Tile {
         }
         this.tileId = newTileId;
         this.tiletype = tiletype;
-        if (this.particleEmitter) {
+        if (this.particleEmitter && tiletype != TileTypes.Water) {
             ParticleManager.removeEmitter(this.particleEmitter);
             this.particleEmitter = null;
+        }
+        else if (this.particleEmitter) {
+            this.particleEmitter.stop();
         }
         switch (tiletype) {
             case TileTypes.Fire:
@@ -677,12 +683,30 @@ class Tile {
                 });
                 this.particleEmitter.setTint(0xf7ec8a);
                 break;
+            case TileTypes.Ice:
+                this.particleEmitter = ParticleManager.createEmitter({
+                    x: this.hitbox.x,
+                    y: this.hitbox.y,
+                    lifespan: { min: 300, max: 400 },
+                    speed: { min: 1, max: 7 },
+                    angle: { min: 0, max: 360 },
+                    //scale: { start: 1, end: 0.12, ease: '' },
+                    alpha: { start: 1, end: 0.5, ease: 'Linear' },
+                    frequency: 6,
+                    emitZone: { source: new Phaser.Geom.Rectangle(0, 0, this.hitbox.width, this.hitbox.height) },
+                    frame: 'melt_00.png',
+                });
+                this.particleEmitter.setTint(0xFFFFFF);
+                this.particleEmitter.stop();
                 break;
         }
     }
     destroy() {
         if (this.sprite) {
             this.sprite.destroy();
+        }
+        if (this.particleEmitter) {
+            ParticleManager.removeEmitter(this.particleEmitter);
         }
     }
 }
@@ -833,6 +857,8 @@ class TilesetManager {
         });
         tile.sprite.play(key);
         tile.sprite.once('animationcomplete', onDone);
+        if (tile.particleEmitter)
+            tile.particleEmitter.start();
     }
     static getTileHitbox(tileId, posX, posY, rotation) {
         let hitboxData = this.tilesetJson['customHitboxes'][tileId.toString()];
