@@ -1056,6 +1056,7 @@ class BasePlayer extends Entity {
         if (this.stateMachine.currentStateKey == PlayerStates.Sleep) {
             this.isAtGoal = false;
             this.stateMachine.changeState(PlayerStates.Idle);
+            this.view.showIndicator();
         }
     }
     lateUpdate() {
@@ -1158,6 +1159,14 @@ class BasePlayerView {
         this.player.getStateMachine().addStateChangedListener(this.changeStateAnimation, this);
         let keyDownSprite = scene.add.sprite(0, 0, 'tutorial_sheet', 'key-down_00.png');
         keyDownSprite.setAlpha(0);
+        let playerIndicatorSprite = scene.add.sprite(0, 0, 'tutorial_sheet', 'player-pointer_00.png');
+        this.playerIndicatorAnimator = new Animator(scene, playerIndicatorSprite, null);
+        this.playerIndicatorAnimator.createAnimation('indicator', 'tutorial_sheet', 'player-pointer_', 2, 8, 4);
+        this.playerIndicatorAnimator.sprite.setAlpha(0);
+        this.playerIndicatorAnimator.sprite.on('animationcomplete', () => {
+            this.playerIndicatorAnimator.sprite.setAlpha(0);
+        });
+        this.playerIndicatorAnimator.sprite.setTint(this.color);
         this.keyDownAnimator = new Animator(scene, keyDownSprite, null);
         this.keyDownAnimator.createAnimation('keydown', 'tutorial_sheet', 'key-down_', 2, 4, -1);
     }
@@ -1216,6 +1225,15 @@ class BasePlayerView {
         if (this.keyDownAnimator.sprite.anims.isPlaying) {
             this.keyDownAnimator.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.top - 16);
         }
+        if (this.playerIndicatorAnimator.sprite.anims.isPlaying) {
+            this.playerIndicatorAnimator.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.top - 16);
+        }
+    }
+    showIndicator() {
+        if (!this.keyDownAnimator.sprite.anims.isPlaying) {
+            this.playerIndicatorAnimator.sprite.setAlpha(1);
+            this.playerIndicatorAnimator.sprite.play('indicator');
+        }
     }
     playKeyDownTutorial() {
         if (!this.keyDownAnimator.sprite.anims.isPlaying) {
@@ -1237,6 +1255,8 @@ class BasePlayerView {
         switch (state) {
             case PlayerStates.Sleep:
                 this.sprite.alpha = 0.75;
+                if (this.playerIndicatorAnimator && this.playerIndicatorAnimator.sprite)
+                    this.playerIndicatorAnimator.sprite.setAlpha(0);
             case PlayerStates.Sleep:
             case PlayerStates.Crouch:
                 this.flamePosOffset = 2;
@@ -1260,6 +1280,8 @@ class BasePlayerView {
     }
     destroy() {
         this.animator.destroy();
+        this.playerIndicatorAnimator.destroy();
+        this.keyDownAnimator.destroy();
     }
 }
 class FirePlayer extends BasePlayer {

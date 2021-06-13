@@ -14,6 +14,7 @@ class BasePlayerView {
     private flamePosOffset:number = 0;
 
     private keyDownAnimator:Animator;
+    private playerIndicatorAnimator:Animator;
 
     private readonly animationNames:Map<number, string> = new Map<number, string>([
         [PlayerStates.Idle, 'idle'],
@@ -57,6 +58,16 @@ class BasePlayerView {
 
         let keyDownSprite = scene.add.sprite(0, 0, 'tutorial_sheet', 'key-down_00.png');
         keyDownSprite.setAlpha(0);
+
+        let playerIndicatorSprite = scene.add.sprite(0, 0, 'tutorial_sheet', 'player-pointer_00.png');
+        this.playerIndicatorAnimator = new Animator(scene, playerIndicatorSprite, null);
+        this.playerIndicatorAnimator.createAnimation('indicator', 'tutorial_sheet', 'player-pointer_', 2, 8, 4);
+
+        this.playerIndicatorAnimator.sprite.setAlpha(0);
+        this.playerIndicatorAnimator.sprite.on('animationcomplete', () => {
+            this.playerIndicatorAnimator.sprite.setAlpha(0);
+        });
+        this.playerIndicatorAnimator.sprite.setTint(this.color);
 
         this.keyDownAnimator = new Animator(scene, keyDownSprite, null);
         this.keyDownAnimator.createAnimation('keydown', 'tutorial_sheet', 'key-down_', 2, 4, -1);
@@ -123,6 +134,16 @@ class BasePlayerView {
         if (this.keyDownAnimator.sprite.anims.isPlaying) {
             this.keyDownAnimator.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.top - 16);
         }
+        if (this.playerIndicatorAnimator.sprite.anims.isPlaying) {
+            this.playerIndicatorAnimator.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.top - 16);
+        }
+    }
+
+    public showIndicator() {
+        if (!this.keyDownAnimator.sprite.anims.isPlaying) {
+            this.playerIndicatorAnimator.sprite.setAlpha(1);
+            this.playerIndicatorAnimator.sprite.play('indicator');
+        }
     }
 
     public playKeyDownTutorial() {
@@ -148,6 +169,8 @@ class BasePlayerView {
         switch(state)  {
             case PlayerStates.Sleep:
                 this.sprite.alpha = 0.75;
+                if (this.playerIndicatorAnimator && this.playerIndicatorAnimator.sprite) 
+                    this.playerIndicatorAnimator.sprite.setAlpha(0);
             case PlayerStates.Sleep:
             case PlayerStates.Crouch:
                 this.flamePosOffset = 2;
@@ -172,5 +195,7 @@ class BasePlayerView {
 
     public destroy() {
         this.animator.destroy();
+        this.playerIndicatorAnimator.destroy();
+        this.keyDownAnimator.destroy();
     }
 }

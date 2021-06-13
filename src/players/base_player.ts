@@ -47,6 +47,7 @@ class BasePlayer extends Entity
         if (this.stateMachine.currentStateKey == PlayerStates.Sleep) {
             this.isAtGoal = false;
             this.stateMachine.changeState(PlayerStates.Idle);
+            this.view.showIndicator();
         }
     }
 
