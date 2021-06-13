@@ -354,13 +354,13 @@ class ScreenTransition {
         });
         this.graphics.depth = 7;
         this.graphics.clear();
-        let left = -10;
+        let left = -20;
         let right = 380;
         let points = [{ x: left, y: 0 }];
         for (let y = 320 / 8; y <= 320; y += 320 / 8) {
-            points.push({ x: left, y });
+            points.push({ x: left + 18, y });
             left -= 20;
-            points.push({ x: left - 18, y });
+            points.push({ x: left, y });
         }
         for (let y = 320; y >= 0; y -= 320 / 8) {
             points.push({ x: right, y });
