@@ -16,6 +16,7 @@ class BasePlayer extends Entity
     public view:BasePlayerView;
 
     public currentInputState:PlayerInputsState;
+    public isAtGoal:boolean = false;
 
     public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates, view:BasePlayerView) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
@@ -43,6 +44,7 @@ class BasePlayer extends Entity
 
     wakeUp():void {
         if (this.stateMachine.currentStateKey == PlayerStates.Sleep) {
+            this.isAtGoal = false;
             this.stateMachine.changeState(PlayerStates.Idle);
         }
     }

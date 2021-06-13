@@ -64,10 +64,15 @@ class GameScene extends Phaser.Scene
     firePlayerStateChanged(state:PlayerStates) {
         switch(state)  {
             case PlayerStates.Sleep:
-                this.icePlayer.wakeUp();
+                if (this.icePlayer.isAtGoal && this.firePlayer.isAtGoal) {
+                    this.gameOver(true);
+                }
+                else {
+                    this.icePlayer.wakeUp();
+                }
             break;
             case PlayerStates.Dead:
-                this.gameOver();
+                this.gameOver(false);
             break;
         }
     }
@@ -75,15 +80,20 @@ class GameScene extends Phaser.Scene
     icePlayerStateChanged(state:PlayerStates) {
         switch(state)  {
             case PlayerStates.Sleep:
-                this.firePlayer.wakeUp();
+                if (this.icePlayer.isAtGoal && this.firePlayer.isAtGoal) {
+                    this.gameOver(true);
+                }
+                else {
+                    this.firePlayer.wakeUp();
+                }
             break;
             case PlayerStates.Dead:
-                this.gameOver();
+                this.gameOver(false);
             break;
         }
     }
 
-    gameOver() {
+    gameOver(won:boolean) {
         if (!this.isGameOver) {
             this.isGameOver = true;
 

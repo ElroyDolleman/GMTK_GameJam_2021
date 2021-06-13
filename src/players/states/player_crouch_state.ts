@@ -21,20 +21,19 @@ class PlayerCrouchState extends PlayerGroundedState
     }
 
     public onCollisionSolved(result: CollisionResult): void {
-        if (this.hasTorchUnderneath(result.tiles)) {
-            this.machine.changeState(PlayerStates.Sleep);
-        }
-    }
-
-    private hasTorchUnderneath(tiles: Tile[]):boolean {
-        for (let i = 0; i < tiles.length; i++) {
-            if (tiles[i].tiletype != TileTypes.Torch && tiles[i].tiletype != TileTypes.GoldTorch) {
+        for (let i = 0; i < result.tiles.length; i++) {
+            if (result.tiles[i].tiletype != TileTypes.Torch && result.tiles[i].tiletype != TileTypes.GoldTorch) {
                 continue;
             }
-            if (this.isStandingOnTile(tiles[i])) {
-                return true;
+            if (this.isStandingOnTile(result.tiles[i])) {
+
+                if (result.tiles[i].tiletype == TileTypes.GoldTorch) {
+                    this.machine.owner.isAtGoal = true;
+                }
+
+                this.machine.changeState(PlayerStates.Sleep);
+                break;
             }
         }
-        return false;
     }
 }

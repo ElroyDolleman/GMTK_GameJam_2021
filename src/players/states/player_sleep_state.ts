@@ -5,14 +5,15 @@ class PlayerSleepState extends PlayerGroundedState
     }
 
     public enter(): void {
-        
+
     }
+
     public update(): void {
-        
+
     }
 
     public leave(): void {
-        
+
     }
 
     public onCollisionSolved(result: CollisionResult): void {

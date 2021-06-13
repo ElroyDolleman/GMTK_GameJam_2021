@@ -38,6 +38,10 @@ class BasePlayerView {
         this.createStateAnimation(PlayerStates.Sleep);
         this.createStateAnimation(PlayerStates.Dead, 5, 10, 0);
 
+        // Win animation
+        let key = 'goal';
+        this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', 4);
+
         this.changeStateAnimation(player.getStateMachine().currentStateKey);
 
         this.player.getStateMachine().addStateChangedListener(this.changeStateAnimation, this);
@@ -60,7 +64,18 @@ class BasePlayerView {
     }
 
     public changeStateAnimation(state:PlayerStates) {
-        this.animator.changeAnimation(this.playerName + this.animationNames.get(state));
+
+        if (state == PlayerStates.Sleep) {
+            this.sprite.alpha = 0.75;
+        }
+        else this.sprite.alpha = 1;
+
+        if (state == PlayerStates.Sleep && this.player.isAtGoal) {
+            this.animator.changeAnimation(this.playerName + 'goal');
+        }
+        else {
+            this.animator.changeAnimation(this.playerName + this.animationNames.get(state));
+        }
     }
 
     public destroy() {

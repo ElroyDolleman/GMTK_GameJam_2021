@@ -40,24 +40,34 @@ class GameScene extends Phaser.Scene {
     firePlayerStateChanged(state) {
         switch (state) {
             case PlayerStates.Sleep:
-                this.icePlayer.wakeUp();
+                if (this.icePlayer.isAtGoal && this.firePlayer.isAtGoal) {
+                    this.gameOver(true);
+                }
+                else {
+                    this.icePlayer.wakeUp();
+                }
                 break;
             case PlayerStates.Dead:
-                this.gameOver();
+                this.gameOver(false);
                 break;
         }
     }
     icePlayerStateChanged(state) {
         switch (state) {
             case PlayerStates.Sleep:
-                this.firePlayer.wakeUp();
+                if (this.icePlayer.isAtGoal && this.firePlayer.isAtGoal) {
+                    this.gameOver(true);
+                }
+                else {
+                    this.firePlayer.wakeUp();
+                }
                 break;
             case PlayerStates.Dead:
-                this.gameOver();
+                this.gameOver(false);
                 break;
         }
     }
-    gameOver() {
+    gameOver(won) {
         if (!this.isGameOver) {
             this.isGameOver = true;
             this.screenTransition.onLevelClose(this.reloadLevel, this);
@@ -834,6 +844,7 @@ var PlayerStates;
 class BasePlayer extends Entity {
     constructor(scene, spawnPosition, startingState, view) {
         super(new Phaser.Geom.Rectangle(spawnPosition.x + 3, spawnPosition.y - 14, 10, 14));
+        this.isAtGoal = false;
         this.stateMachine = new StateMachine(this);
         this.stateMachine.addState(PlayerStates.Idle, new PlayerIdleState());
         this.stateMachine.addState(PlayerStates.Walk, new PlayerWalkState());
@@ -853,6 +864,7 @@ class BasePlayer extends Entity {
     }
     wakeUp() {
         if (this.stateMachine.currentStateKey == PlayerStates.Sleep) {
+            this.isAtGoal = false;
             this.stateMachine.changeState(PlayerStates.Idle);
         }
     }
@@ -929,6 +941,9 @@ class BasePlayerView {
         this.createStateAnimation(PlayerStates.Crouch);
         this.createStateAnimation(PlayerStates.Sleep);
         this.createStateAnimation(PlayerStates.Dead, 5, 10, 0);
+        // Win animation
+        let key = 'goal';
+        this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', 4);
         this.changeStateAnimation(player.getStateMachine().currentStateKey);
         this.player.getStateMachine().addStateChangedListener(this.changeStateAnimation, this);
     }
@@ -947,7 +962,17 @@ class BasePlayerView {
         this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', length, frameRate, repeat);
     }
     changeStateAnimation(state) {
-        this.animator.changeAnimation(this.playerName + this.animationNames.get(state));
+        if (state == PlayerStates.Sleep) {
+            this.sprite.alpha = 0.75;
+        }
+        else
+            this.sprite.alpha = 1;
+        if (state == PlayerStates.Sleep && this.player.isAtGoal) {
+            this.animator.changeAnimation(this.playerName + 'goal');
+        }
+        else {
+            this.animator.changeAnimation(this.playerName + this.animationNames.get(state));
+        }
     }
     destroy() {
         this.animator.destroy();
@@ -1091,20 +1116,18 @@ class PlayerCrouchState extends PlayerGroundedState {
     leave() {
     }
     onCollisionSolved(result) {
-        if (this.hasTorchUnderneath(result.tiles)) {
-            this.machine.changeState(PlayerStates.Sleep);
-        }
-    }
-    hasTorchUnderneath(tiles) {
-        for (let i = 0; i < tiles.length; i++) {
-            if (tiles[i].tiletype != TileTypes.Torch && tiles[i].tiletype != TileTypes.GoldTorch) {
+        for (let i = 0; i < result.tiles.length; i++) {
+            if (result.tiles[i].tiletype != TileTypes.Torch && result.tiles[i].tiletype != TileTypes.GoldTorch) {
                 continue;
             }
-            if (this.isStandingOnTile(tiles[i])) {
-                return true;
+            if (this.isStandingOnTile(result.tiles[i])) {
+                if (result.tiles[i].tiletype == TileTypes.GoldTorch) {
+                    this.machine.owner.isAtGoal = true;
+                }
+                this.machine.changeState(PlayerStates.Sleep);
+                break;
             }
         }
-        return false;
     }
 }
 class PlayerDeadState {
