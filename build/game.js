@@ -873,10 +873,13 @@ class BasePlayer extends Entity {
     }
     onCollisionSolved(result) {
         if (result.isDamaged && this.stateMachine.currentStateKey != PlayerStates.Dead) {
-            this.speed.x = 0;
-            this.stateMachine.changeState(PlayerStates.Dead);
+            this.die();
         }
         this.stateMachine.currentState.onCollisionSolved(result);
+    }
+    die() {
+        this.speed.x = 0;
+        this.stateMachine.changeState(PlayerStates.Dead);
     }
     updateMovementControls(maxRunSpeed = PlayerStats.RunSpeed, runAcceleration = PlayerStats.RunAcceleration) {
         if (this.currentInputState.leftFrames > 0) {
@@ -981,7 +984,7 @@ class BasePlayerView {
 class FirePlayer extends BasePlayer {
     constructor(scene, spawnPosition, startingState) {
         super(scene, spawnPosition, startingState, new BasePlayerView('firechar'));
-        this.damageTileTypes.push(TileTypes.Water);
+        //this.damageTileTypes.push(TileTypes.Water);
     }
     onCollisionSolved(result) {
         super.onCollisionSolved(result);
@@ -1003,6 +1006,11 @@ class FirePlayer extends BasePlayer {
             else if (result.tiles[i].tiletype == TileTypes.Grass) {
                 if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
                     TilesetManager.changeTileType(result.tiles[i], TileTypes.Fire);
+                }
+            }
+            else if (result.tiles[i].tiletype == TileTypes.Water && this.stateMachine.currentStateKey != PlayerStates.Dead) {
+                if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
+                    this.die();
                 }
             }
         }

@@ -55,11 +55,15 @@ class BasePlayer extends Entity
 
     onCollisionSolved(result: CollisionResult):void {
         if (result.isDamaged && this.stateMachine.currentStateKey != PlayerStates.Dead) {
-            this.speed.x = 0;
-            this.stateMachine.changeState(PlayerStates.Dead);
+            this.die();
         }
 
         this.stateMachine.currentState.onCollisionSolved(result);
+    }
+
+    public die() {
+        this.speed.x = 0;
+        this.stateMachine.changeState(PlayerStates.Dead);
     }
 
     updateMovementControls(maxRunSpeed: number = PlayerStats.RunSpeed, runAcceleration: number = PlayerStats.RunAcceleration) {

@@ -3,7 +3,7 @@ class FirePlayer extends BasePlayer
     public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates) {
         super(scene, spawnPosition, startingState, new BasePlayerView('firechar'));
 
-        this.damageTileTypes.push(TileTypes.Water);
+        //this.damageTileTypes.push(TileTypes.Water);
     }
 
     onCollisionSolved(result: CollisionResult):void {
@@ -28,8 +28,12 @@ class FirePlayer extends BasePlayer
             }
             else if (result.tiles[i].tiletype == TileTypes.Grass) {
                 if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
-
                     TilesetManager.changeTileType(result.tiles[i], TileTypes.Fire);
+                }
+            }
+            else if (result.tiles[i].tiletype == TileTypes.Water && this.stateMachine.currentStateKey != PlayerStates.Dead) {
+                if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
+                    this.die();
                 }
             }
         }
