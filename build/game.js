@@ -646,7 +646,7 @@ class Tile {
         }
         this.tileId = newTileId;
         this.tiletype = tiletype;
-        if (this.particleEmitter && tiletype != TileTypes.Water) {
+        if (this.particleEmitter && this.originalTiletype != TileTypes.Water) {
             ParticleManager.removeEmitter(this.particleEmitter);
             this.particleEmitter = null;
         }
@@ -698,6 +698,10 @@ class Tile {
                 });
                 this.particleEmitter.setTint(0xFFFFFF);
                 this.particleEmitter.stop();
+                if (this.originalTiletype == TileTypes.Water) {
+                    this.particleEmitter.explode(10, this.hitbox.x, //RandomUtil.randomFloat(this.hitbox.x, this.hitbox.x + this.hitbox.width),
+                    this.hitbox.y);
+                }
                 break;
         }
     }
@@ -857,8 +861,10 @@ class TilesetManager {
         });
         tile.sprite.play(key);
         tile.sprite.once('animationcomplete', onDone);
-        if (tile.particleEmitter)
+        if (tile.particleEmitter) {
+            tile.particleEmitter.frequency = 6;
             tile.particleEmitter.start();
+        }
     }
     static getTileHitbox(tileId, posX, posY, rotation) {
         let hitboxData = this.tilesetJson['customHitboxes'][tileId.toString()];
@@ -1437,6 +1443,15 @@ var NumberUtil;
     }
     NumberUtil.lerp = lerp;
 })(NumberUtil || (NumberUtil = {}));
+class RandomUtil {
+    constructor() { }
+    static randomInt(min, max) {
+        return Math.round(this.randomFloat(Math.ceil(min), Math.floor(max)));
+    }
+    static randomFloat(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+}
 class TimeUtil {
     constructor() {
     }

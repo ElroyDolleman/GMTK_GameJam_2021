@@ -104,7 +104,10 @@ class TilesetManager {
         tile.sprite.play(key);
         tile.sprite.once('animationcomplete', onDone);
 
-        if (tile.particleEmitter) tile.particleEmitter.start();
+        if (tile.particleEmitter) {
+            tile.particleEmitter.frequency = 6;
+            tile.particleEmitter.start();
+        }
     }
 
     public static getTileHitbox(tileId:number, posX:number, posY:number, rotation:number) {

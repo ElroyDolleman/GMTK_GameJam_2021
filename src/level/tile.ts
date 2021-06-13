@@ -76,7 +76,7 @@ class Tile
         this.tileId = newTileId;
         this.tiletype = tiletype;
 
-        if (this.particleEmitter && tiletype != TileTypes.Water) {
+        if (this.particleEmitter && this.originalTiletype != TileTypes.Water) {
             ParticleManager.removeEmitter(this.particleEmitter);
             this.particleEmitter = null;
         }
@@ -129,6 +129,13 @@ class Tile
                 });
                 this.particleEmitter.setTint(0xFFFFFF);
                 this.particleEmitter.stop();
+
+                if (this.originalTiletype == TileTypes.Water) {
+                    this.particleEmitter.explode(10, 
+                        this.hitbox.x,//RandomUtil.randomFloat(this.hitbox.x, this.hitbox.x + this.hitbox.width),
+                        this.hitbox.y,//RandomUtil.randomFloat(this.hitbox.y, this.hitbox.y + this.hitbox.height)
+                    );
+                }
                 break;
         }
     }
