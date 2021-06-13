@@ -2,8 +2,8 @@ class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene', active: true });
         this.isGameOver = false;
-        this.currentLevelNumber = 6;
-        this.maxLevelNumber = 7;
+        this.currentLevelNumber = 1;
+        this.maxLevelNumber = 8;
         GameScene.instance = this;
     }
     init() {
@@ -175,7 +175,7 @@ class AudioManager {
     static startMusic(scene) {
         let music = scene.sound.add('background_music', {
             mute: false,
-            volume: 0.1,
+            volume: 0.13,
             rate: 1,
             detune: 0,
             seek: 0,
