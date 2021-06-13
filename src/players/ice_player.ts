@@ -19,5 +19,13 @@ class IcePlayer extends BasePlayer
                 }
             }
         }
+
+        let firePlayerState = GameScene.instance.firePlayer.getStateMachine().currentStateKey;
+        if (firePlayerState != PlayerStates.Sleep && firePlayerState != PlayerStates.Dead && 
+            this.stateMachine.currentStateKey != PlayerStates.Sleep && this.stateMachine.currentStateKey != PlayerStates.Dead) {
+            if (Phaser.Geom.Rectangle.Overlaps(GameScene.instance.firePlayer.hitbox, this.hitbox)) {
+                this.die();
+            }
+        }
     }
 }

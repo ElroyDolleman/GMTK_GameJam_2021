@@ -51,7 +51,7 @@ class AudioManager {
     private static startMusic(scene:Phaser.Scene) {
         let music = scene.sound.add('background_music', {
             mute: false,
-            volume: 0.1,
+            volume: 0.13,
             rate: 1,
             detune: 0,
             seek: 0,

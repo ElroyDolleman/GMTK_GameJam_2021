@@ -25,7 +25,6 @@ class TimeManager
         this.animationFrame++;
 
         this.tileAnimations.forEach((anim, key) => {
-            console.log(anim.currentAnim.key, key);
             anim.setCurrentFrame(anim.currentAnim.frames[this.animationFrame % 4]);
         });
     }

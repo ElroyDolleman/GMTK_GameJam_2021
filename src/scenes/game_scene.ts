@@ -1,5 +1,7 @@
 class GameScene extends Phaser.Scene
 {
+    static instance:GameScene;
+
     private screenTransition:ScreenTransition;
     private levelLoader:LevelLoader;
     private currentLevel:Level;
@@ -10,10 +12,11 @@ class GameScene extends Phaser.Scene
 
     private isGameOver:boolean = false;
     private currentLevelNumber:number = 6;
-    private readonly maxLevelNumber:number = 6;
+    private readonly maxLevelNumber:number = 7;
 
     constructor() {
         super({ key: 'GameScene', active: true});
+        GameScene.instance = this;
     }
 
     init() {

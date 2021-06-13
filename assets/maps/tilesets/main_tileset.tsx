@@ -312,7 +312,7 @@
  </tile>
  <tile id="63">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="64">

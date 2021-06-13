@@ -3,7 +3,8 @@ class GameScene extends Phaser.Scene {
         super({ key: 'GameScene', active: true });
         this.isGameOver = false;
         this.currentLevelNumber = 6;
-        this.maxLevelNumber = 6;
+        this.maxLevelNumber = 7;
+        GameScene.instance = this;
     }
     init() {
         this.levelLoader = new LevelLoader(this);
@@ -131,7 +132,6 @@ class TimeManager {
     static globalAnimationUpdate() {
         this.animationFrame++;
         this.tileAnimations.forEach((anim, key) => {
-            console.log(anim.currentAnim.key, key);
             anim.setCurrentFrame(anim.currentAnim.frames[this.animationFrame % 4]);
         });
     }
@@ -942,7 +942,6 @@ class TilesetManager {
             repeat: -1
         });
         tile.sprite.play(key);
-        console.log(tile.id);
         TimeManager.tileAnimations.set(tile.id, tile.sprite.anims);
     }
     static changeTileType(tile, tileType) {
@@ -1336,6 +1335,13 @@ class IcePlayer extends BasePlayer {
                 if (CollisionUtil.hitboxVerticallyAligned(this.hitbox, result.tiles[i].hitbox)) {
                     TilesetManager.changeTileType(result.tiles[i], TileTypes.Ice);
                 }
+            }
+        }
+        let firePlayerState = GameScene.instance.firePlayer.getStateMachine().currentStateKey;
+        if (firePlayerState != PlayerStates.Sleep && firePlayerState != PlayerStates.Dead &&
+            this.stateMachine.currentStateKey != PlayerStates.Sleep && this.stateMachine.currentStateKey != PlayerStates.Dead) {
+            if (Phaser.Geom.Rectangle.Overlaps(GameScene.instance.firePlayer.hitbox, this.hitbox)) {
+                this.die();
             }
         }
     }
