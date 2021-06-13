@@ -1367,12 +1367,12 @@ class IcePlayerView {
 }
 var PlayerStats;
 (function (PlayerStats) {
-    PlayerStats.JumpPower = 16;
+    PlayerStats.JumpPower = 15;
     PlayerStats.InitialJumpPower = 198;
     PlayerStats.RunAcceleration = 20;
     PlayerStats.RunSpeed = 100;
     PlayerStats.Gravity = 16;
-    PlayerStats.MaxFallSpeed = 240;
+    PlayerStats.MaxFallSpeed = 220;
 })(PlayerStats || (PlayerStats = {}));
 class PlayerAirborneState {
     constructor() { }
