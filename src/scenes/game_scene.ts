@@ -23,6 +23,7 @@ class GameScene extends Phaser.Scene
 
     preload() {
         this.load.atlas('player_sheet', 'assets/player_sheet.png', 'assets/player_sheet.json');
+        this.load.atlas('tutorial_sheet', 'assets/tutorial_sheet.png', 'assets/tutorial_sheet.json');
         this.load.atlas('particles_sheet', 'assets/particles_sheet.png', 'assets/particles_sheet.json');
 
         this.levelLoader.preloadLevelJson();
@@ -68,6 +69,9 @@ class GameScene extends Phaser.Scene
             this.currentLevelNumber = Math.min(levelNum, this.maxLevelNumber);
         }
         this.currentLevel = this.levelLoader.create("level_" + this.currentLevelNumber);
+        if (this.currentLevelNumber > 2) {
+            ShouldExplainCrouch = false;
+        }
 
         this.icePlayer.getStateMachine().addStateChangedListener(this.icePlayerStateChanged, this);
         this.firePlayer.getStateMachine().addStateChangedListener(this.firePlayerStateChanged, this);

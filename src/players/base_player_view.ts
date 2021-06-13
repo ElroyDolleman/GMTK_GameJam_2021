@@ -13,6 +13,8 @@ class BasePlayerView {
     public flameEmitter:Phaser.GameObjects.Particles.ParticleEmitter;
     private flamePosOffset:number = 0;
 
+    private keyDownAnimator:Animator;
+
     private readonly animationNames:Map<number, string> = new Map<number, string>([
         [PlayerStates.Idle, 'idle'],
         [PlayerStates.Walk, 'walk'],
@@ -52,6 +54,12 @@ class BasePlayerView {
         this.changeStateAnimation(player.getStateMachine().currentStateKey);
 
         this.player.getStateMachine().addStateChangedListener(this.changeStateAnimation, this);
+
+        let keyDownSprite = scene.add.sprite(0, 0, 'tutorial_sheet', 'key-down_00.png');
+        keyDownSprite.setAlpha(0);
+
+        this.keyDownAnimator = new Animator(scene, keyDownSprite, null);
+        this.keyDownAnimator.createAnimation('keydown', 'tutorial_sheet', 'key-down_', 2, 4, -1);
     }
 
     public createParticlesSystems(scene:Phaser.Scene) {
@@ -111,6 +119,23 @@ class BasePlayerView {
         this.flameEmitter.setPosition(this.player.hitbox.centerX, this.player.hitbox.top + this.flamePosOffset);
 
         this.animator.update();
+
+        if (this.keyDownAnimator.sprite.anims.isPlaying) {
+            this.keyDownAnimator.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.top - 16);
+        }
+    }
+
+    public playKeyDownTutorial() {
+        if (!this.keyDownAnimator.sprite.anims.isPlaying) {
+            this.keyDownAnimator.sprite.play('keydown');
+            this.keyDownAnimator.sprite.setAlpha(1);
+        }
+    }
+    public stopKeyDownTutorial() {
+        if (this.keyDownAnimator.sprite.anims.isPlaying) {
+            this.keyDownAnimator.sprite.stop();
+            this.keyDownAnimator.sprite.setAlpha(0);
+        }
     }
 
     private createStateAnimation(state:PlayerStates, length:number = 4, frameRate?:number, repeat?:number) {

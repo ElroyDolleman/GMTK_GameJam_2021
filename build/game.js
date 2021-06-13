@@ -11,6 +11,7 @@ class GameScene extends Phaser.Scene {
     }
     preload() {
         this.load.atlas('player_sheet', 'assets/player_sheet.png', 'assets/player_sheet.json');
+        this.load.atlas('tutorial_sheet', 'assets/tutorial_sheet.png', 'assets/tutorial_sheet.json');
         this.load.atlas('particles_sheet', 'assets/particles_sheet.png', 'assets/particles_sheet.json');
         this.levelLoader.preloadLevelJson();
         this.levelLoader.preloadSpritesheets();
@@ -45,6 +46,9 @@ class GameScene extends Phaser.Scene {
             this.currentLevelNumber = Math.min(levelNum, this.maxLevelNumber);
         }
         this.currentLevel = this.levelLoader.create("level_" + this.currentLevelNumber);
+        if (this.currentLevelNumber > 2) {
+            ShouldExplainCrouch = false;
+        }
         this.icePlayer.getStateMachine().addStateChangedListener(this.icePlayerStateChanged, this);
         this.firePlayer.getStateMachine().addStateChangedListener(this.firePlayerStateChanged, this);
         this.screenTransition.onLevelEnter(() => {
@@ -1062,6 +1066,20 @@ class BasePlayer extends Entity {
             this.die();
         }
         this.stateMachine.currentState.onCollisionSolved(result);
+        if (ShouldExplainCrouch) {
+            if (this.stateMachine.currentStateKey != PlayerStates.Sleep) {
+                for (let i = 0; i < result.tiles.length; i++) {
+                    if (result.tiles[i].tiletype != TileTypes.GoldTorch) {
+                        continue;
+                    }
+                    if (CollisionUtil.hitboxVerticallyAligned(this.hitbox, result.tiles[i].hitbox)) {
+                        this.view.playKeyDownTutorial();
+                        return;
+                    }
+                }
+            }
+            this.view.stopKeyDownTutorial();
+        }
     }
     die() {
         this.speed.x = 0;
@@ -1138,6 +1156,10 @@ class BasePlayerView {
         this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', 4);
         this.changeStateAnimation(player.getStateMachine().currentStateKey);
         this.player.getStateMachine().addStateChangedListener(this.changeStateAnimation, this);
+        let keyDownSprite = scene.add.sprite(0, 0, 'tutorial_sheet', 'key-down_00.png');
+        keyDownSprite.setAlpha(0);
+        this.keyDownAnimator = new Animator(scene, keyDownSprite, null);
+        this.keyDownAnimator.createAnimation('keydown', 'tutorial_sheet', 'key-down_', 2, 4, -1);
     }
     createParticlesSystems(scene) {
         let dustFrameNames = scene.anims.generateFrameNames('particles_sheet', {
@@ -1191,6 +1213,21 @@ class BasePlayerView {
         this.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.bottom);
         this.flameEmitter.setPosition(this.player.hitbox.centerX, this.player.hitbox.top + this.flamePosOffset);
         this.animator.update();
+        if (this.keyDownAnimator.sprite.anims.isPlaying) {
+            this.keyDownAnimator.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.top - 16);
+        }
+    }
+    playKeyDownTutorial() {
+        if (!this.keyDownAnimator.sprite.anims.isPlaying) {
+            this.keyDownAnimator.sprite.play('keydown');
+            this.keyDownAnimator.sprite.setAlpha(1);
+        }
+    }
+    stopKeyDownTutorial() {
+        if (this.keyDownAnimator.sprite.anims.isPlaying) {
+            this.keyDownAnimator.sprite.stop();
+            this.keyDownAnimator.sprite.setAlpha(0);
+        }
     }
     createStateAnimation(state, length = 4, frameRate, repeat) {
         let key = this.animationNames.get(state);
@@ -1532,6 +1569,7 @@ class StateMachine {
     }
 }
 let ParticleManager;
+let ShouldExplainCrouch = true;
 var NumberUtil;
 (function (NumberUtil) {
     /**

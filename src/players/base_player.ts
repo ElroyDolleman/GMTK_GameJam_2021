@@ -60,6 +60,21 @@ class BasePlayer extends Entity
         }
 
         this.stateMachine.currentState.onCollisionSolved(result);
+
+        if (ShouldExplainCrouch) {
+            if (this.stateMachine.currentStateKey != PlayerStates.Sleep) {
+                for (let i = 0; i < result.tiles.length; i++) {
+                    if (result.tiles[i].tiletype != TileTypes.GoldTorch) {
+                        continue;
+                    }
+                    if (CollisionUtil.hitboxVerticallyAligned(this.hitbox, result.tiles[i].hitbox)) {
+                        this.view.playKeyDownTutorial();
+                        return;
+                    }
+                }
+            }
+            this.view.stopKeyDownTutorial();
+        }
     }
 
     public die() {
