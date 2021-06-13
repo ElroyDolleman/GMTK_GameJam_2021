@@ -9,7 +9,7 @@ class TimeManager
 
     private static globalAnimationUpdateInterval:number;
 
-    private static animationFrame:number = 0;
+    public static animationFrame:number = 0;
 
     static initialize() {
         this.startTime = new Date();

@@ -9,7 +9,9 @@ class BasePlayerView {
     readonly playerName:string;
     readonly color:number;
 
-    public dustEmitter: Phaser.GameObjects.Particles.ParticleEmitter;
+    public dustEmitter:Phaser.GameObjects.Particles.ParticleEmitter;
+    public flameEmitter:Phaser.GameObjects.Particles.ParticleEmitter;
+    private flamePosOffset:number = 0;
 
     private readonly animationNames:Map<number, string> = new Map<number, string>([
         [PlayerStates.Idle, 'idle'],
@@ -73,6 +75,19 @@ class BasePlayerView {
             frame: dustFrames,
         });
         this.dustEmitter.setTint(this.color);
+
+        this.flameEmitter = ParticleManager.createEmitter({
+            x: this.player.hitbox.centerX,
+            y: this.player.hitbox.top,
+            lifespan: { min: 260, max: 310 },
+            speed: { min: 7, max: 12},
+            angle: { min: 270-10, max: 270+10},
+            scale: { start: 1, end: 0, ease: 'Power3' },
+            frequency: 48,
+            emitZone: { source: new Phaser.Geom.Rectangle(-2, 0, 4, -3) },
+            frame: 'flame-particle_00.png',
+        });
+        this.flameEmitter.setTint(this.color);
     }
 
     public playLandParticles() {
@@ -93,6 +108,8 @@ class BasePlayerView {
         }
 
         this.sprite.setPosition(this.player.hitbox.centerX, this.player.hitbox.bottom);
+        this.flameEmitter.setPosition(this.player.hitbox.centerX, this.player.hitbox.top + this.flamePosOffset);
+
         this.animator.update();
     }
 
@@ -103,10 +120,22 @@ class BasePlayerView {
 
     public changeStateAnimation(state:PlayerStates) {
 
-        if (state == PlayerStates.Sleep) {
-            this.sprite.alpha = 0.75;
+        switch(state)  {
+            case PlayerStates.Sleep:
+                this.sprite.alpha = 0.75;
+            case PlayerStates.Sleep:
+            case PlayerStates.Crouch:
+                this.flamePosOffset = 2;
+            break;
+            case PlayerStates.Dead:
+                this.flameEmitter.setVisible(false);
+            break;
+            default: this.flamePosOffset = 0; break;
         }
-        else this.sprite.alpha = 1;
+
+        if (state != PlayerStates.Sleep) {
+            this.sprite.alpha = 1;
+        }
 
         if (state == PlayerStates.Sleep && this.player.isAtGoal) {
             this.animator.changeAnimation(this.playerName + 'goal');
