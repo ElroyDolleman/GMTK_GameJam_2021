@@ -8,6 +8,7 @@ class PlayerCrouchState extends PlayerGroundedState
 
     public enter(): void {
         this.machine.owner.speed.x = 0;
+        this.machine.owner.view.animator.squish(1, 0.65, 170);
     }
 
     public update(): void {

@@ -15,6 +15,8 @@ class PlayerJumpState extends PlayerAirborneState
 
         this.machine.owner.view.playJumpParticles();
         AudioManager.sounds.jump.play();
+
+        this.machine.owner.view.animator.squish(1, 1.3, 180);
     }
     public update():void {
         //TODO: Change air accel?

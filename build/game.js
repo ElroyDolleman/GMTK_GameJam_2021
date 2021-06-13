@@ -1400,6 +1400,7 @@ class PlayerAirborneState {
         let state = this.machine.owner.speed.x == 0 ? PlayerStates.Idle : PlayerStates.Walk;
         this.machine.changeState(state);
         this.machine.owner.view.playLandParticles();
+        this.machine.owner.view.animator.squish(1.1, 0.6, 200);
     }
     headbonk() {
         this.machine.owner.speed.y = 0;
@@ -1446,6 +1447,7 @@ class PlayerCrouchState extends PlayerGroundedState {
     }
     enter() {
         this.machine.owner.speed.x = 0;
+        this.machine.owner.view.animator.squish(1, 0.65, 170);
     }
     update() {
         if (this.machine.owner.currentInputState.downFrames == 0) {
@@ -1526,6 +1528,7 @@ class PlayerJumpState extends PlayerAirborneState {
         this.machine.owner.speed.y -= PlayerStats.InitialJumpPower;
         this.machine.owner.view.playJumpParticles();
         AudioManager.sounds.jump.play();
+        this.machine.owner.view.animator.squish(1, 1.3, 180);
     }
     update() {
         //TODO: Change air accel?

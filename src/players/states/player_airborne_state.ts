@@ -36,6 +36,7 @@ class PlayerAirborneState implements IBaseState<BasePlayer>
         this.machine.changeState(state);
 
         this.machine.owner.view.playLandParticles();
+        this.machine.owner.view.animator.squish(1.1, 0.6, 200);
     }
 
     protected headbonk() {
