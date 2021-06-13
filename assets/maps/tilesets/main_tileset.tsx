@@ -242,27 +242,27 @@
  </tile>
  <tile id="45">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="46">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="47">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="48">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="49">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="50">

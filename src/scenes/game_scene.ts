@@ -6,9 +6,11 @@ class GameScene extends Phaser.Scene
 
     public icePlayer:IcePlayer;
     public firePlayer:FirePlayer;
-    public startingPlayers: BasePlayer[];
+    public startingPlayers:BasePlayer[];
 
-    private isGameOver: boolean = false;
+    private isGameOver:boolean = false;
+    private currentLevelNumber:number = 1;
+    private readonly maxLevelNumber:number = 3;
 
     constructor() {
         super({ key: 'GameScene', active: true});
@@ -33,7 +35,7 @@ class GameScene extends Phaser.Scene
 
         this.screenTransition = new ScreenTransition(this);
 
-        this.startLevel();
+        this.startLevel(1);
     }
 
     update() {
@@ -56,7 +58,10 @@ class GameScene extends Phaser.Scene
         this.isGameOver = false;
         this.startingPlayers = [];
 
-        this.currentLevel = this.levelLoader.create("playground");
+        if (levelNum != undefined) {
+            this.currentLevelNumber = Math.min(levelNum, this.maxLevelNumber);
+        }
+        this.currentLevel = this.levelLoader.create("level_" + this.currentLevelNumber);
 
         this.icePlayer.getStateMachine().addStateChangedListener(this.icePlayerStateChanged, this);
         this.firePlayer.getStateMachine().addStateChangedListener(this.firePlayerStateChanged, this);
@@ -104,7 +109,7 @@ class GameScene extends Phaser.Scene
         if (!this.isGameOver) {
             this.isGameOver = true;
 
-            this.screenTransition.onLevelClose(this.startLevel, this);
+            this.screenTransition.onLevelClose(() => { this.startLevel(won ? this.currentLevelNumber+1 : this.currentLevelNumber) }, this);
         }
     }
 
