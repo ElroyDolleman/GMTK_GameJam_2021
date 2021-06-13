@@ -1,0 +1,272 @@
+{
+	"textures": [
+		{
+			"image": "particles_sheet.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 48,
+				"h": 48
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "poof_04.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 4,
+						"w": 24,
+						"h": 24
+					},
+					"frame": {
+						"x": 0,
+						"y": 0,
+						"w": 24,
+						"h": 24
+					}
+				},
+				{
+					"filename": "poof_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 6,
+						"w": 20,
+						"h": 20
+					},
+					"frame": {
+						"x": 0,
+						"y": 24,
+						"w": 20,
+						"h": 20
+					}
+				},
+				{
+					"filename": "poof_05.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 19,
+						"h": 21
+					},
+					"frame": {
+						"x": 24,
+						"y": 0,
+						"w": 19,
+						"h": 21
+					}
+				},
+				{
+					"filename": "poof_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 8,
+						"w": 16,
+						"h": 16
+					},
+					"frame": {
+						"x": 20,
+						"y": 24,
+						"w": 16,
+						"h": 16
+					}
+				},
+				{
+					"filename": "poof_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 10,
+						"y": 10,
+						"w": 12,
+						"h": 12
+					},
+					"frame": {
+						"x": 36,
+						"y": 21,
+						"w": 12,
+						"h": 12
+					}
+				},
+				{
+					"filename": "dust_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 6,
+						"w": 5,
+						"h": 6
+					},
+					"frame": {
+						"x": 43,
+						"y": 0,
+						"w": 5,
+						"h": 6
+					}
+				},
+				{
+					"filename": "poof_00.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 11,
+						"w": 10,
+						"h": 10
+					},
+					"frame": {
+						"x": 36,
+						"y": 33,
+						"w": 10,
+						"h": 10
+					}
+				},
+				{
+					"filename": "dust_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 10,
+						"w": 6,
+						"h": 4
+					},
+					"frame": {
+						"x": 0,
+						"y": 44,
+						"w": 6,
+						"h": 4
+					}
+				},
+				{
+					"filename": "dust_04.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 7,
+						"w": 5,
+						"h": 5
+					},
+					"frame": {
+						"x": 43,
+						"y": 6,
+						"w": 5,
+						"h": 5
+					}
+				},
+				{
+					"filename": "dust_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 5,
+						"w": 8,
+						"h": 6
+					},
+					"frame": {
+						"x": 20,
+						"y": 40,
+						"w": 8,
+						"h": 6
+					}
+				},
+				{
+					"filename": "dust_03.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 6,
+						"w": 6,
+						"h": 7
+					},
+					"frame": {
+						"x": 28,
+						"y": 40,
+						"w": 6,
+						"h": 7
+					}
+				},
+				{
+					"filename": "flame-particle_00.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 4,
+						"h": 4
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 4,
+						"h": 4
+					},
+					"frame": {
+						"x": 6,
+						"y": 44,
+						"w": 4,
+						"h": 4
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:6babb1e89fcad7f8b0e1dc23899ea084:519d4ad0bea01cbded4b87f41553b671:d9a1619995873c28774d593c93e55330$"
+	}
+}

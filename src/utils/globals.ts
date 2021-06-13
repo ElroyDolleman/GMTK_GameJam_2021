@@ -1,0 +1,1 @@
+let ParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager;

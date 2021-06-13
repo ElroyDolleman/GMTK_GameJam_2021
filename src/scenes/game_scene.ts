@@ -21,6 +21,7 @@ class GameScene extends Phaser.Scene
 
     preload() {
         this.load.atlas('player_sheet', 'assets/player_sheet.png', 'assets/player_sheet.json');
+        this.load.atlas('particles_sheet', 'assets/particles_sheet.png', 'assets/particles_sheet.json');
 
         this.levelLoader.preloadLevelJson();
         this.levelLoader.preloadSpritesheets();
@@ -32,7 +33,7 @@ class GameScene extends Phaser.Scene
 
         this.screenTransition = new ScreenTransition(this);
 
-        this.reloadLevel();
+        this.startLevel();
     }
 
     update() {
@@ -41,7 +42,13 @@ class GameScene extends Phaser.Scene
         this.currentLevel.update();
     }
 
-    reloadLevel() {
+    startLevel(levelNum?:number) {
+        if (ParticleManager) {
+            ParticleManager.destroy();
+        }
+        ParticleManager = this.add.particles('particles_sheet');
+        ParticleManager.setDepth(1);
+
         if (this.currentLevel) {
             this.currentLevel.destroy();
         }
@@ -97,7 +104,7 @@ class GameScene extends Phaser.Scene
         if (!this.isGameOver) {
             this.isGameOver = true;
 
-            this.screenTransition.onLevelClose(this.reloadLevel, this);
+            this.screenTransition.onLevelClose(this.startLevel, this);
         }
     }
 

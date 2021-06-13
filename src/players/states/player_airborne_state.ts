@@ -34,6 +34,8 @@ class PlayerAirborneState implements IBaseState<BasePlayer>
 
         let state:PlayerStates = this.machine.owner.speed.x == 0 ? PlayerStates.Idle : PlayerStates.Walk;
         this.machine.changeState(state);
+
+        this.machine.owner.view.playLandParticles();
     }
 
     protected headbonk() {

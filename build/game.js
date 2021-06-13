@@ -9,6 +9,7 @@ class GameScene extends Phaser.Scene {
     }
     preload() {
         this.load.atlas('player_sheet', 'assets/player_sheet.png', 'assets/player_sheet.json');
+        this.load.atlas('particles_sheet', 'assets/particles_sheet.png', 'assets/particles_sheet.json');
         this.levelLoader.preloadLevelJson();
         this.levelLoader.preloadSpritesheets();
     }
@@ -16,13 +17,18 @@ class GameScene extends Phaser.Scene {
         InputManager.instance.initialize(this);
         this.levelLoader.init();
         this.screenTransition = new ScreenTransition(this);
-        this.reloadLevel();
+        this.startLevel();
     }
     update() {
         InputManager.instance.update();
         this.currentLevel.update();
     }
-    reloadLevel() {
+    startLevel(levelNum) {
+        if (ParticleManager) {
+            ParticleManager.destroy();
+        }
+        ParticleManager = this.add.particles('particles_sheet');
+        ParticleManager.setDepth(1);
         if (this.currentLevel) {
             this.currentLevel.destroy();
         }
@@ -70,7 +76,7 @@ class GameScene extends Phaser.Scene {
     gameOver(won) {
         if (!this.isGameOver) {
             this.isGameOver = true;
-            this.screenTransition.onLevelClose(this.reloadLevel, this);
+            this.screenTransition.onLevelClose(this.startLevel, this);
         }
     }
     draw() {
@@ -856,6 +862,7 @@ class BasePlayer extends Entity {
         this.stateMachine.start(startingState);
         this.view = view;
         this.view.createAnimator(scene, this);
+        this.view.createParticlesSystems(scene);
         this.view.animator.updateSpritePosition();
     }
     update() {
@@ -919,7 +926,7 @@ class BasePlayer extends Entity {
     }
 }
 class BasePlayerView {
-    constructor(playerName) {
+    constructor(playerName, color) {
         this.animationNames = new Map([
             [PlayerStates.Idle, 'idle'],
             [PlayerStates.Walk, 'walk'],
@@ -931,6 +938,7 @@ class BasePlayerView {
         ]);
         this.textureKey = 'player_sheet';
         this.playerName = playerName;
+        this.color = color;
     }
     createAnimator(scene, player) {
         this.player = player;
@@ -949,6 +957,36 @@ class BasePlayerView {
         this.animator.createAnimation(this.playerName + key, this.textureKey, this.playerName + '-' + key + '_', 4);
         this.changeStateAnimation(player.getStateMachine().currentStateKey);
         this.player.getStateMachine().addStateChangedListener(this.changeStateAnimation, this);
+    }
+    createParticlesSystems(scene) {
+        let dustFrameNames = scene.anims.generateFrameNames('particles_sheet', {
+            prefix: 'dust_',
+            suffix: '.png',
+            end: 4,
+            zeroPad: 2
+        });
+        let dustFrames = [];
+        dustFrameNames.forEach((e) => { dustFrames.push(e.frame.toString()); });
+        this.dustEmitter = ParticleManager.createEmitter({
+            x: 0,
+            y: 0,
+            lifespan: { min: 300, max: 340 },
+            speed: { min: 4, max: 6 },
+            angle: 270,
+            frequency: -1,
+            emitZone: { source: new Phaser.Geom.Rectangle(-2, -2, 4, 0) },
+            frame: dustFrames,
+        });
+        this.dustEmitter.setTint(this.color);
+    }
+    playLandParticles() {
+        this.dustEmitter.explode(7, this.player.hitbox.centerX, this.player.hitbox.bottom);
+    }
+    playJumpParticles() {
+        this.dustEmitter.explode(5, this.player.hitbox.centerX, this.player.hitbox.bottom);
+    }
+    playWalkParticles() {
+        this.dustEmitter.explode(2, this.player.hitbox.centerX, this.player.hitbox.bottom);
     }
     update() {
         if (this.player.speed.x > 0) {
@@ -983,7 +1021,7 @@ class BasePlayerView {
 }
 class FirePlayer extends BasePlayer {
     constructor(scene, spawnPosition, startingState) {
-        super(scene, spawnPosition, startingState, new BasePlayerView('firechar'));
+        super(scene, spawnPosition, startingState, new BasePlayerView('firechar', 0xFF0000));
         //this.damageTileTypes.push(TileTypes.Water);
     }
     onCollisionSolved(result) {
@@ -1018,7 +1056,7 @@ class FirePlayer extends BasePlayer {
 }
 class IcePlayer extends BasePlayer {
     constructor(scene, spawnPosition, startingState) {
-        super(scene, spawnPosition, startingState, new BasePlayerView('icechar'));
+        super(scene, spawnPosition, startingState, new BasePlayerView('icechar', 0x8be1eb));
         this.solidTileTypes.push(TileTypes.Water);
         this.damageTileTypes.push(TileTypes.Fire);
     }
@@ -1069,6 +1107,7 @@ class PlayerAirborneState {
         this.machine.owner.speed.y = 0;
         let state = this.machine.owner.speed.x == 0 ? PlayerStates.Idle : PlayerStates.Walk;
         this.machine.changeState(state);
+        this.machine.owner.view.playLandParticles();
     }
     headbonk() {
         this.machine.owner.speed.y = 0;
@@ -1191,11 +1230,11 @@ class PlayerJumpState extends PlayerAirborneState {
     enter() {
         this.isHoldingJump = true;
         this.machine.owner.speed.y -= PlayerStats.InitialJumpPower;
-        //this.startJumpHeldDownFrames = this.machine.owner.currentInputState.jumpFrames;
+        this.machine.owner.view.playJumpParticles();
     }
     update() {
         //TODO: Change air accel?
-        this.machine.owner.updateMovementControls(PlayerStats.RunSpeed);
+        this.machine.owner.updateMovementControls();
         if (this.isHoldingJump && this.jumpHeldDownFrames > 1 && this.jumpHeldDownFrames < 12) {
             this.machine.owner.speed.y -= PlayerStats.JumpPower;
         }
@@ -1229,10 +1268,17 @@ class PlayerSleepState extends PlayerGroundedState {
 class PlayerWalkState extends PlayerGroundedState {
     constructor() {
         super();
+        this.particleTimer = 0;
     }
     enter() {
+        this.particleTimer = 0;
     }
     update() {
+        this.particleTimer++;
+        if (this.particleTimer == 12) {
+            this.particleTimer = 0;
+            this.machine.owner.view.playWalkParticles();
+        }
         this.machine.owner.updateMovementControls();
         if (this.machine.owner.speed.x == 0) {
             this.machine.changeState(PlayerStates.Idle);
@@ -1274,6 +1320,7 @@ class StateMachine {
         this.states.clear();
     }
 }
+let ParticleManager;
 var NumberUtil;
 (function (NumberUtil) {
     /**

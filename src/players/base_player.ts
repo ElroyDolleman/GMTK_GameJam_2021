@@ -34,6 +34,7 @@ class BasePlayer extends Entity
 
         this.view = view;
         this.view.createAnimator(scene, this);
+        this.view.createParticlesSystems(scene);
         this.view.animator.updateSpritePosition();
     }
 

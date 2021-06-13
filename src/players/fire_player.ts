@@ -1,7 +1,7 @@
 class FirePlayer extends BasePlayer
 {
     public constructor(scene:Phaser.Scene, spawnPosition:Phaser.Math.Vector2, startingState:PlayerStates) {
-        super(scene, spawnPosition, startingState, new BasePlayerView('firechar'));
+        super(scene, spawnPosition, startingState, new BasePlayerView('firechar', 0xFF0000));
 
         //this.damageTileTypes.push(TileTypes.Water);
     }
