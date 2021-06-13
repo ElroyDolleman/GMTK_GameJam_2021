@@ -3,7 +3,7 @@ class GameScene extends Phaser.Scene {
         super({ key: 'GameScene', active: true });
         this.isGameOver = false;
         this.currentLevelNumber = 1;
-        this.maxLevelNumber = 8;
+        this.maxLevelNumber = 9;
         GameScene.instance = this;
     }
     init() {
