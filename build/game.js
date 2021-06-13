@@ -3,7 +3,7 @@ class GameScene extends Phaser.Scene {
         super({ key: 'GameScene', active: true });
         this.isGameOver = false;
         this.currentLevelNumber = 1;
-        this.maxLevelNumber = 9;
+        this.maxLevelNumber = 10;
         GameScene.instance = this;
     }
     init() {
@@ -29,6 +29,7 @@ class GameScene extends Phaser.Scene {
             AudioManager.playMusic(this);
             this.startLevel(this.currentLevelNumber);
         }, this);
+        //Reset level
         this.input.keyboard.on('keyup-R', () => {
             if (this.isGameOver || this.screenTransition.isActive) {
                 return;
@@ -130,7 +131,7 @@ var config = {
     backgroundColor: '#000000',
     parent: 'GMTK Game Jam 2021',
     title: "GMTK Game Jam 2021",
-    version: "0.0.1",
+    version: "0.0.2",
     disableContextMenu: true,
     scene: [GameScene],
 };
@@ -1341,7 +1342,7 @@ class FirePlayer extends BasePlayer {
             else if (result.tiles[i].tiletype == TileTypes.Grass) {
                 if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
                     TilesetManager.changeTileType(result.tiles[i], TileTypes.Fire);
-                    AudioManager.sounds.fire.play({ volume: 0.24 });
+                    AudioManager.sounds.fire.play({ volume: 0.2 });
                 }
             }
             else if (result.tiles[i].tiletype == TileTypes.Water && this.stateMachine.currentStateKey != PlayerStates.Dead) {

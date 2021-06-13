@@ -12,7 +12,7 @@ class GameScene extends Phaser.Scene
 
     private isGameOver:boolean = false;
     private currentLevelNumber:number = 1;
-    private readonly maxLevelNumber:number = 9;
+    private readonly maxLevelNumber:number = 10;
 
     constructor() {
         super({ key: 'GameScene', active: true});

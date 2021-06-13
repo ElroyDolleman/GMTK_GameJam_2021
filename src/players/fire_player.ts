@@ -31,7 +31,7 @@ class FirePlayer extends BasePlayer
                 if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
                     TilesetManager.changeTileType(result.tiles[i], TileTypes.Fire);
 
-                    AudioManager.sounds.fire.play({volume: 0.24});
+                    AudioManager.sounds.fire.play({volume: 0.2});
                 }
             }
             else if (result.tiles[i].tiletype == TileTypes.Water && this.stateMachine.currentStateKey != PlayerStates.Dead) {

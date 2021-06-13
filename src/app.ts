@@ -10,7 +10,7 @@ var config = {
     backgroundColor: '#000000',//'#333333',
     parent: 'GMTK Game Jam 2021',
     title: "GMTK Game Jam 2021",
-    version: "0.0.1",
+    version: "0.0.2",
     disableContextMenu: true,
     scene: [ GameScene ],
 };
