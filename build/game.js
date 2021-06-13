@@ -2,8 +2,8 @@ class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene', active: true });
         this.isGameOver = false;
-        this.currentLevelNumber = 1;
-        this.maxLevelNumber = 3;
+        this.currentLevelNumber = 4;
+        this.maxLevelNumber = 5;
     }
     init() {
         this.levelLoader = new LevelLoader(this);
@@ -19,7 +19,7 @@ class GameScene extends Phaser.Scene {
         InputManager.instance.initialize(this);
         this.levelLoader.init();
         this.screenTransition = new ScreenTransition(this);
-        this.startLevel(1);
+        this.startLevel(this.currentLevelNumber);
     }
     update() {
         InputManager.instance.update();
@@ -891,6 +891,7 @@ class BasePlayer extends Entity {
     }
     die() {
         this.speed.x = 0;
+        this.speed.y = Math.max(0, this.speed.y);
         this.stateMachine.changeState(PlayerStates.Dead);
     }
     updateMovementControls(maxRunSpeed = PlayerStats.RunSpeed, runAcceleration = PlayerStats.RunAcceleration) {
@@ -1109,7 +1110,7 @@ var PlayerStats;
     PlayerStats.JumpPower = 16;
     PlayerStats.InitialJumpPower = 198;
     PlayerStats.RunAcceleration = 20;
-    PlayerStats.RunSpeed = 110;
+    PlayerStats.RunSpeed = 100;
     PlayerStats.Gravity = 16;
     PlayerStats.MaxFallSpeed = 240;
 })(PlayerStats || (PlayerStats = {}));

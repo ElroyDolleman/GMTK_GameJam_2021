@@ -9,8 +9,8 @@ class GameScene extends Phaser.Scene
     public startingPlayers:BasePlayer[];
 
     private isGameOver:boolean = false;
-    private currentLevelNumber:number = 1;
-    private readonly maxLevelNumber:number = 3;
+    private currentLevelNumber:number = 4;
+    private readonly maxLevelNumber:number = 5;
 
     constructor() {
         super({ key: 'GameScene', active: true});
@@ -35,7 +35,7 @@ class GameScene extends Phaser.Scene
 
         this.screenTransition = new ScreenTransition(this);
 
-        this.startLevel(1);
+        this.startLevel(this.currentLevelNumber);
     }
 
     update() {

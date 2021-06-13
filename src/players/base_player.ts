@@ -64,7 +64,7 @@ class BasePlayer extends Entity
 
     public die() {
         this.speed.x = 0;
-        this.speed.y = Math.min(0, this.speed.y);
+        this.speed.y = Math.max(0, this.speed.y);
         this.stateMachine.changeState(PlayerStates.Dead);
     }
 

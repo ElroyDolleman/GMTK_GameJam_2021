@@ -297,17 +297,17 @@
  </tile>
  <tile id="60">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="61">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="62">
   <properties>
-   <property name="TileType" value=""/>
+   <property name="TileType" value="solid"/>
   </properties>
  </tile>
  <tile id="63">
