@@ -14,16 +14,21 @@ class GameScene extends Phaser.Scene {
         this.load.atlas('particles_sheet', 'assets/particles_sheet.png', 'assets/particles_sheet.json');
         this.levelLoader.preloadLevelJson();
         this.levelLoader.preloadSpritesheets();
+        AudioManager.preload(this);
     }
     create() {
         InputManager.instance.initialize(this);
         this.levelLoader.init();
+        AudioManager.createAllSounds(this);
+        AudioManager.playMusic(this);
         this.screenTransition = new ScreenTransition(this);
         this.startLevel(this.currentLevelNumber);
     }
     update() {
         InputManager.instance.update();
-        this.currentLevel.update();
+        if (this.currentLevel) {
+            this.currentLevel.update();
+        }
     }
     startLevel(levelNum) {
         if (ParticleManager) {
@@ -128,6 +133,58 @@ class TimeManager {
 }
 TimeManager.tileAnimations = new Map();
 TimeManager.animationFrame = 0;
+class AudioManager {
+    constructor() { }
+    ;
+    static preload(scene) {
+        scene.load.audio('jump', 'audio/jump.wav');
+        scene.load.audio('fire', 'audio/fire.wav');
+        scene.load.audio('ice', 'audio/ice.wav');
+        scene.load.audio('dead', 'audio/dead.wav');
+        scene.load.audio('background_music', 'audio/6_Town_2_Master.ogg');
+    }
+    static createAllSounds(scene) {
+        this.sounds = {
+            jump: scene.sound.add('jump', this.defaultConfig),
+            fire: scene.sound.add('fire', this.defaultConfig),
+            freeze: scene.sound.add('ice', this.defaultConfig),
+            dead: scene.sound.add('dead', this.defaultConfig),
+        };
+        // let test:Phaser.Sound.BaseSound;
+        // test.play()
+    }
+    static playMusic(scene) {
+        if (!scene.sound.locked) {
+            this.startMusic(scene);
+        }
+        else {
+            scene.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
+                this.startMusic(scene);
+            });
+        }
+    }
+    static startMusic(scene) {
+        let music = scene.sound.add('background_music', {
+            mute: false,
+            volume: 0.2,
+            rate: 1,
+            detune: 0,
+            seek: 0,
+            loop: true,
+            delay: 0
+        });
+        music.play();
+    }
+}
+AudioManager.defaultConfig = {
+    mute: false,
+    volume: 1,
+    rate: 1,
+    detune: 0,
+    seek: 0,
+    loop: false,
+    delay: 0
+};
 class CollisionResult {
     constructor() {
         this.onTop = false;
@@ -743,6 +800,7 @@ class Tile {
                 if (this.originalTiletype == TileTypes.Water) {
                     this.particleEmitter.explode(10, this.hitbox.x, //RandomUtil.randomFloat(this.hitbox.x, this.hitbox.x + this.hitbox.width),
                     this.hitbox.y);
+                    AudioManager.sounds.freeze.play({ volume: 0.3 });
                 }
                 break;
         }
@@ -1174,6 +1232,7 @@ class FirePlayer extends BasePlayer {
             if (result.tiles[i].tiletype == TileTypes.Ice) {
                 if (CollisionUtil.hitboxesAligned(result.tiles[i].hitbox, this.hitbox)) {
                     if (!result.tiles[i].sprite.anims.isPlaying) {
+                        //AudioManager.sounds.melt.play();
                         TilesetManager.playAnimationOnTile(result.tiles[i], 5, () => {
                             if (result.tiles[i].originalTiletype == TileTypes.Ice) {
                                 result.tiles[i].makeEmpty();
@@ -1188,6 +1247,7 @@ class FirePlayer extends BasePlayer {
             else if (result.tiles[i].tiletype == TileTypes.Grass) {
                 if (Phaser.Geom.Rectangle.Overlaps(result.tiles[i].hitbox, this.hitbox)) {
                     TilesetManager.changeTileType(result.tiles[i], TileTypes.Fire);
+                    AudioManager.sounds.fire.play({ volume: 0.3 });
                 }
             }
             else if (result.tiles[i].tiletype == TileTypes.Water && this.stateMachine.currentStateKey != PlayerStates.Dead) {
@@ -1325,6 +1385,7 @@ class PlayerDeadState {
     constructor() {
     }
     enter() {
+        AudioManager.sounds.dead.play({ volume: 0.1 });
     }
     update() {
     }
@@ -1375,6 +1436,7 @@ class PlayerJumpState extends PlayerAirborneState {
         this.isHoldingJump = true;
         this.machine.owner.speed.y -= PlayerStats.InitialJumpPower;
         this.machine.owner.view.playJumpParticles();
+        AudioManager.sounds.jump.play();
     }
     update() {
         //TODO: Change air accel?

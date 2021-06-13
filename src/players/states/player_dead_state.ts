@@ -7,7 +7,7 @@ class PlayerDeadState implements IBaseState<BasePlayer>
     }
 
     public enter(): void {
-
+        AudioManager.sounds.dead.play({volume: 0.1});
     }
 
     public update(): void {

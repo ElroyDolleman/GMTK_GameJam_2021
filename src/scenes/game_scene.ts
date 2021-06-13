@@ -27,21 +27,27 @@ class GameScene extends Phaser.Scene
 
         this.levelLoader.preloadLevelJson();
         this.levelLoader.preloadSpritesheets();
+
+        AudioManager.preload(this);
     }
 
     create() {
         InputManager.instance.initialize(this);
         this.levelLoader.init();
 
-        this.screenTransition = new ScreenTransition(this);
+        AudioManager.createAllSounds(this);
+        AudioManager.playMusic(this);
 
+        this.screenTransition = new ScreenTransition(this);
         this.startLevel(this.currentLevelNumber);
     }
 
     update() {
         InputManager.instance.update();
 
-        this.currentLevel.update();
+        if (this.currentLevel) {
+            this.currentLevel.update();
+        }
     }
 
     startLevel(levelNum?:number) {

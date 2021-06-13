@@ -14,6 +14,7 @@ class PlayerJumpState extends PlayerAirborneState
         this.machine.owner.speed.y -= PlayerStats.InitialJumpPower;
 
         this.machine.owner.view.playJumpParticles();
+        AudioManager.sounds.jump.play();
     }
     public update():void {
         //TODO: Change air accel?
