@@ -19,7 +19,7 @@ const MappedTileTypes = new Map<number, number>([
 
 class Tile
 {
-    public get id():string { return this.cellX.toString() + this.cellY.toString(); }
+    public get id():string { return 'tile' + this.cellX.toString() + '-' + this.cellY.toString(); }
 
     public readonly cellX:number;
     public readonly cellY:number;

@@ -2,8 +2,8 @@ class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene', active: true });
         this.isGameOver = false;
-        this.currentLevelNumber = 1;
-        this.maxLevelNumber = 5;
+        this.currentLevelNumber = 6;
+        this.maxLevelNumber = 6;
     }
     init() {
         this.levelLoader = new LevelLoader(this);
@@ -130,7 +130,8 @@ class TimeManager {
     }
     static globalAnimationUpdate() {
         this.animationFrame++;
-        this.tileAnimations.forEach((anim) => {
+        this.tileAnimations.forEach((anim, key) => {
+            console.log(anim.currentAnim.key, key);
             anim.setCurrentFrame(anim.currentAnim.frames[this.animationFrame % 4]);
         });
     }
@@ -736,7 +737,7 @@ class Tile {
         //     this.debug.fillRectShape(hitbox);
         // }
     }
-    get id() { return this.cellX.toString() + this.cellY.toString(); }
+    get id() { return 'tile' + this.cellX.toString() + '-' + this.cellY.toString(); }
     get isSemisolid() { return this.tiletype == TileTypes.SemiSolid || this.tiletype == TileTypes.Torch || this.tiletype == TileTypes.GoldTorch; }
     get isSolid() { return this.tiletype == TileTypes.Solid || this.tiletype == TileTypes.Ice; }
     get canStandOn() { return this.isSolid || this.isSemisolid; }
@@ -941,6 +942,7 @@ class TilesetManager {
             repeat: -1
         });
         tile.sprite.play(key);
+        console.log(tile.id);
         TimeManager.tileAnimations.set(tile.id, tile.sprite.anims);
     }
     static changeTileType(tile, tileType) {

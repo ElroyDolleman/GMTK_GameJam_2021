@@ -69,6 +69,7 @@ class TilesetManager {
         });
         tile.sprite.play(key);
 
+        console.log(tile.id);
         TimeManager.tileAnimations.set(tile.id, tile.sprite.anims);
     }
 
