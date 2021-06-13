@@ -2,7 +2,7 @@ class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene', active: true });
         this.isGameOver = false;
-        this.currentLevelNumber = 4;
+        this.currentLevelNumber = 1;
         this.maxLevelNumber = 5;
     }
     init() {
@@ -559,8 +559,7 @@ class LevelLoader {
                 sprite = this.makeSprite(tileId, posX, posY, rotation, levelJson['tileset_name']);
             }
             let tileType = TilesetManager.getTileTypeFromID(tileId);
-            let hitboxData = tilesetJson['customHitboxes'][tileId.toString()];
-            let hitbox = this.getTileHitbox(hitboxData, posX, posY, rotation);
+            let hitbox = TilesetManager.getTileHitbox(tileId, posX, posY, rotation);
             tiles.push(new Tile(sprite, tileType, tileId, cellX, cellY, posX, posY, hitbox));
         }
         return new Tilemap(tiles, gridCellsX, gridCellsY, TILE_WIDTH, TILE_HEIGHT);
@@ -593,48 +592,6 @@ class LevelLoader {
         console.error("the tileId is stored as if it has been rotated/flipped, but the code does not recognize it");
         return 0;
     }
-    getTileHitbox(hitboxData, posX, posY, rotation) {
-        let width = TILE_WIDTH;
-        let height = TILE_HEIGHT;
-        let hitbox = new Phaser.Geom.Rectangle(posX, posY, width, height);
-        if (!hitboxData)
-            return hitbox;
-        if (hitboxData['x'])
-            hitbox.x += hitboxData['x'];
-        if (hitboxData['y'])
-            hitbox.y += hitboxData['y'];
-        if (hitboxData['width'])
-            hitbox.width = hitboxData['width'];
-        if (hitboxData['height'])
-            hitbox.height = hitboxData['height'];
-        return this.rotateTileHitbox(hitbox, rotation);
-    }
-    rotateTileHitbox(hitbox, rotation) {
-        if (rotation == 0)
-            return hitbox;
-        let offsetY = TILE_HEIGHT - hitbox.height;
-        let degree = Phaser.Math.RadToDeg(rotation);
-        switch (degree) {
-            case -90:
-            case 270:
-                hitbox.x += offsetY;
-                hitbox.width = TILE_HEIGHT - offsetY;
-                hitbox.y -= offsetY;
-                hitbox.height = TILE_HEIGHT;
-                break;
-            case 90:
-            case -270:
-                hitbox.width = TILE_HEIGHT - offsetY;
-                hitbox.y -= offsetY;
-                hitbox.height = TILE_HEIGHT;
-                break;
-            case 180:
-            case -180:
-                hitbox.y -= offsetY;
-                break;
-        }
-        return hitbox;
-    }
 }
 var TileTypes;
 (function (TileTypes) {
@@ -660,11 +617,10 @@ class Tile {
         this.position = new Phaser.Geom.Point(posX, posY);
         this.cellX = cellX;
         this.cellY = cellY;
-        this.tileId = tileId;
-        this.tiletype = tiletype;
-        this.originalTiletype = tiletype;
         this.hitbox = hitbox;
         this.sprite = sprite;
+        this.originalTiletype = tiletype;
+        this.changeTileId(tileId, tiletype);
         if (tileId > 0) {
             TilesetManager.startTileAnimation(this, tileId);
         }
@@ -681,9 +637,34 @@ class Tile {
         this.tiletype = TileTypes.Empty;
         this.sprite.destroy();
     }
-    changeTileId(newTileId) {
-        this.sprite.setFrame(newTileId);
+    changeTileId(newTileId, tiletype) {
+        if (tiletype != TileTypes.Empty) {
+            this.sprite.setFrame(newTileId);
+        }
         this.tileId = newTileId;
+        this.tiletype = tiletype;
+        switch (tiletype) {
+            case TileTypes.Fire:
+                this.particleEmitter = ParticleManager.createEmitter({
+                    x: this.hitbox.centerX,
+                    y: this.hitbox.top,
+                    lifespan: { min: 260, max: 310 },
+                    speed: { min: 8, max: 12 },
+                    angle: { min: 270 - 10, max: 270 + 10 },
+                    scale: { start: 1, end: 0, ease: 'Power3' },
+                    frequency: 48,
+                    emitZone: { source: new Phaser.Geom.Rectangle(-2, -3, 4, -1) },
+                    frame: 'flame-particle_00.png',
+                });
+                this.particleEmitter.setTint(0xFF0000);
+                break;
+            default:
+                if (this.particleEmitter) {
+                    ParticleManager.removeEmitter(this.particleEmitter);
+                    this.particleEmitter = null;
+                }
+                break;
+        }
     }
     destroy() {
         if (this.sprite) {
@@ -813,9 +794,9 @@ class TilesetManager {
         TimeManager.tileAnimations.set(tile.id, tile.sprite.anims);
     }
     static changeTileType(tile, tileType) {
-        tile.tiletype = tileType;
         let tileId = MappedTileTypes.get(tileType);
-        tile.changeTileId(tileId);
+        tile.hitbox = this.getTileHitbox(tileId, tile.position.x, tile.position.y, 0); //TODO: rotation not taken into account
+        tile.changeTileId(tileId, tileType);
         this.startTileAnimation(tile, tileId);
     }
     /**
@@ -838,6 +819,49 @@ class TilesetManager {
         });
         tile.sprite.play(key);
         tile.sprite.once('animationcomplete', onDone);
+    }
+    static getTileHitbox(tileId, posX, posY, rotation) {
+        let hitboxData = this.tilesetJson['customHitboxes'][tileId.toString()];
+        let width = TILE_WIDTH;
+        let height = TILE_HEIGHT;
+        let hitbox = new Phaser.Geom.Rectangle(posX, posY, width, height);
+        if (!hitboxData)
+            return hitbox;
+        if (hitboxData['x'])
+            hitbox.x += hitboxData['x'];
+        if (hitboxData['y'])
+            hitbox.y += hitboxData['y'];
+        if (hitboxData['width'])
+            hitbox.width = hitboxData['width'];
+        if (hitboxData['height'])
+            hitbox.height = hitboxData['height'];
+        return this.rotateTileHitbox(hitbox, rotation);
+    }
+    static rotateTileHitbox(hitbox, rotation) {
+        if (rotation == 0)
+            return hitbox;
+        let offsetY = TILE_HEIGHT - hitbox.height;
+        let degree = Phaser.Math.RadToDeg(rotation);
+        switch (degree) {
+            case -90:
+            case 270:
+                hitbox.x += offsetY;
+                hitbox.width = TILE_HEIGHT - offsetY;
+                hitbox.y -= offsetY;
+                hitbox.height = TILE_HEIGHT;
+                break;
+            case 90:
+            case -270:
+                hitbox.width = TILE_HEIGHT - offsetY;
+                hitbox.y -= offsetY;
+                hitbox.height = TILE_HEIGHT;
+                break;
+            case 180:
+            case -180:
+                hitbox.y -= offsetY;
+                break;
+        }
+        return hitbox;
     }
 }
 /// <reference path="../entities/entity.ts"/>

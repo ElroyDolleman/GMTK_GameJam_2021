@@ -73,10 +73,10 @@ class TilesetManager {
     }
 
     public static changeTileType(tile:Tile, tileType:TileTypes) {
-        tile.tiletype = tileType;
 
         let tileId:number = MappedTileTypes.get(tileType);
-        tile.changeTileId(tileId);
+        tile.hitbox = this.getTileHitbox(tileId, tile.position.x, tile.position.y, 0);//TODO: rotation not taken into account
+        tile.changeTileId(tileId, tileType);
 
         this.startTileAnimation(tile, tileId);
     }
@@ -103,5 +103,46 @@ class TilesetManager {
         });
         tile.sprite.play(key);
         tile.sprite.once('animationcomplete', onDone);
+    }
+
+    public static getTileHitbox(tileId:number, posX:number, posY:number, rotation:number) {
+        let hitboxData = this.tilesetJson['customHitboxes'][tileId.toString()];
+
+        let width = TILE_WIDTH;
+        let height = TILE_HEIGHT;
+        let hitbox = new Phaser.Geom.Rectangle(posX, posY, width, height);
+
+        if (!hitboxData) return hitbox;
+
+        if (hitboxData['x']) hitbox.x += hitboxData['x'];
+        if (hitboxData['y']) hitbox.y += hitboxData['y'];
+        if (hitboxData['width']) hitbox.width = hitboxData['width'];
+        if (hitboxData['height']) hitbox.height = hitboxData['height'];
+
+        return this.rotateTileHitbox(hitbox, rotation);
+    }
+
+    public static rotateTileHitbox(hitbox:Phaser.Geom.Rectangle, rotation:number) {
+        if (rotation == 0) return hitbox;
+
+        let offsetY = TILE_HEIGHT - hitbox.height;
+        let degree = Phaser.Math.RadToDeg(rotation);
+        switch(degree) {
+            case -90: case 270:
+                hitbox.x += offsetY;
+                hitbox.width = TILE_HEIGHT - offsetY;
+                hitbox.y -= offsetY;
+                hitbox.height = TILE_HEIGHT;
+                break;
+            case 90: case -270:
+                hitbox.width = TILE_HEIGHT - offsetY;
+                hitbox.y -= offsetY;
+                hitbox.height = TILE_HEIGHT;
+                break;
+            case 180: case -180:
+                hitbox.y -= offsetY;
+                break;
+        }
+        return hitbox;
     }
 }

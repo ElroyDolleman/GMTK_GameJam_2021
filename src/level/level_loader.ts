@@ -92,9 +92,7 @@ class LevelLoader {
             }
 
             let tileType = TilesetManager.getTileTypeFromID(tileId);
-
-            let hitboxData = tilesetJson['customHitboxes'][tileId.toString()];
-            let hitbox = this.getTileHitbox(hitboxData, posX, posY, rotation);
+            let hitbox = TilesetManager.getTileHitbox(tileId, posX, posY, rotation);
 
             tiles.push(new Tile(sprite, tileType, tileId, cellX, cellY, posX, posY, hitbox));
         }
@@ -132,44 +130,5 @@ class LevelLoader {
         }
         console.error("the tileId is stored as if it has been rotated/flipped, but the code does not recognize it");
         return 0;
-    }
-
-    private getTileHitbox(hitboxData:any, posX:number, posY:number, rotation:number) {
-        let width = TILE_WIDTH;
-        let height = TILE_HEIGHT;
-        let hitbox = new Phaser.Geom.Rectangle(posX, posY, width, height);
-
-        if (!hitboxData) return hitbox;
-
-        if (hitboxData['x']) hitbox.x += hitboxData['x'];
-        if (hitboxData['y']) hitbox.y += hitboxData['y'];
-        if (hitboxData['width']) hitbox.width = hitboxData['width'];
-        if (hitboxData['height']) hitbox.height = hitboxData['height'];
-
-        return this.rotateTileHitbox(hitbox, rotation);
-    }
-
-    private rotateTileHitbox(hitbox:Phaser.Geom.Rectangle, rotation:number) {
-        if (rotation == 0) return hitbox;
-
-        let offsetY = TILE_HEIGHT - hitbox.height;
-        let degree = Phaser.Math.RadToDeg(rotation);
-        switch(degree) {
-            case -90: case 270:
-                hitbox.x += offsetY;
-                hitbox.width = TILE_HEIGHT - offsetY;
-                hitbox.y -= offsetY;
-                hitbox.height = TILE_HEIGHT;
-                break;
-            case 90: case -270:
-                hitbox.width = TILE_HEIGHT - offsetY;
-                hitbox.y -= offsetY;
-                hitbox.height = TILE_HEIGHT;
-                break;
-            case 180: case -180:
-                hitbox.y -= offsetY;
-                break;
-        }
-        return hitbox;
     }
 }

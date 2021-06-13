@@ -35,18 +35,19 @@ class Tile
     public get isSolid():boolean { return this.tiletype == TileTypes.Solid || this.tiletype == TileTypes.Ice; }
     public get canStandOn():boolean { return this.isSolid || this.isSemisolid; }
 
+    public particleEmitter:Phaser.GameObjects.Particles.ParticleEmitter;
+
     //private debug:Phaser.GameObjects.Graphics;
 
     constructor(sprite:Phaser.GameObjects.Sprite, tiletype:TileTypes, tileId:number, cellX:number, cellY:number, posX:number, posY:number, hitbox:Phaser.Geom.Rectangle) {
         this.position = new Phaser.Geom.Point(posX, posY);
         this.cellX = cellX;
         this.cellY = cellY;
-        this.tileId = tileId;
-
-        this.tiletype = tiletype;
-        this.originalTiletype = tiletype;
         this.hitbox = hitbox;
         this.sprite = sprite;
+
+        this.originalTiletype = tiletype;
+        this.changeTileId(tileId, tiletype);
 
         if (tileId > 0) {
             TilesetManager.startTileAnimation(this, tileId);
@@ -63,9 +64,36 @@ class Tile
         this.sprite.destroy();
     }
 
-    public changeTileId(newTileId:number) {
-        this.sprite.setFrame(newTileId);
+    public changeTileId(newTileId:number, tiletype:TileTypes) {
+        if (tiletype != TileTypes.Empty) {
+            this.sprite.setFrame(newTileId);
+        }
+
         this.tileId = newTileId;
+        this.tiletype = tiletype;
+
+        switch(tiletype) {
+            case TileTypes.Fire:
+                this.particleEmitter = ParticleManager.createEmitter({
+                    x: this.hitbox.centerX,
+                    y: this.hitbox.top,
+                    lifespan: { min: 260, max: 310 },
+                    speed: { min: 8, max: 12},
+                    angle: { min: 270-10, max: 270+10},
+                    scale: { start: 1, end: 0, ease: 'Power3' },
+                    frequency: 48,
+                    emitZone: { source: new Phaser.Geom.Rectangle(-2, -3, 4, -1) },
+                    frame: 'flame-particle_00.png',
+                });
+                this.particleEmitter.setTint(0xFF0000);
+                break;
+            default:
+                if (this.particleEmitter) {
+                    ParticleManager.removeEmitter(this.particleEmitter);
+                    this.particleEmitter = null;
+                }
+                break;
+        }
     }
 
     public destroy() {
