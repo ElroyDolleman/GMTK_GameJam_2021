@@ -81,7 +81,14 @@ class GameScene extends Phaser.Scene {
     gameOver(won) {
         if (!this.isGameOver) {
             this.isGameOver = true;
-            this.screenTransition.onLevelClose(() => { this.startLevel(won ? this.currentLevelNumber + 1 : this.currentLevelNumber); }, this);
+            this.screenTransition.onLevelClose(() => {
+                if (won && this.currentLevelNumber == this.maxLevelNumber) {
+                    TimeManager.endTime = new Date();
+                    new EndScreen(this);
+                }
+                else
+                    this.startLevel(won ? this.currentLevelNumber + 1 : this.currentLevelNumber);
+            }, this);
         }
     }
     draw() {
@@ -230,6 +237,41 @@ class CollisionUtil {
 }
 let TILE_WIDTH = 16;
 let TILE_HEIGHT = 16;
+class EndScreen {
+    constructor(scene) {
+        let time = TimeUtil.getTimeDifferenceMSMM(TimeManager.startTime, TimeManager.endTime);
+        let timeString = '';
+        if (time.minutes > 0) {
+            timeString += time.minutes.toString() + 'm ';
+        }
+        timeString += time.seconds.toString() + 's ';
+        timeString += time.milliseconds.toString() + 'ms';
+        this.topText = scene.add.text(320 / 2, 100, 'text', {
+            fontFamily: 'Arial',
+            align: 'center',
+            fontSize: '32px',
+        });
+        this.bottomText = scene.add.text(320 / 2, 160, 'text', {
+            fontFamily: 'Arial',
+            align: 'center',
+            fontSize: '16px',
+        });
+        this.timeText = scene.add.text(320 / 2, 300, 'text', {
+            fontFamily: 'Arial',
+            align: 'center',
+            fontSize: '10px',
+        });
+        this.timeText.text = timeString;
+        this.topText.text = "The End!";
+        this.bottomText.text = "Thank you for playing :)";
+        this.timeText.depth = 69 + 1;
+        this.topText.depth = 69 + 1;
+        this.bottomText.depth = 69 + 1;
+        this.timeText.setOrigin(0.5, 0.5);
+        this.topText.setOrigin(0.5, 0.5);
+        this.bottomText.setOrigin(0.5, 0.5);
+    }
+}
 class ScreenTransition {
     constructor(scene) {
         this.scene = scene;
@@ -1460,6 +1502,27 @@ class TimeUtil {
     }
     static getElapsedMS() {
         return this.currentElapsedMS;
+    }
+    static getTimeDifferenceMSMM(firstDate, secondDate) {
+        var millisecondsDifference = Math.floor(this.getMillisecondsDifference(firstDate, secondDate));
+        var secondsDifference = Math.floor(this.getSecondsDifference(firstDate, secondDate));
+        var minutesDifference = Math.floor(this.getMinutesDifference(firstDate, secondDate));
+        millisecondsDifference -= secondsDifference * 1000;
+        secondsDifference -= minutesDifference * 60;
+        return {
+            minutes: minutesDifference,
+            seconds: secondsDifference,
+            milliseconds: millisecondsDifference
+        };
+    }
+    static getSecondsDifference(firstDate, secondDate) {
+        return (secondDate.getTime() / 1000) - (firstDate.getTime() / 1000);
+    }
+    static getMillisecondsDifference(firstDate, secondDate) {
+        return secondDate.getTime() - firstDate.getTime();
+    }
+    static getMinutesDifference(firstDate, secondDate) {
+        return this.getSecondsDifference(firstDate, secondDate) / 60;
     }
 }
 TimeUtil.currentElapsedMS = (1 / 60) * 1000;

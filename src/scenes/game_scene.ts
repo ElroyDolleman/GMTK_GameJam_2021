@@ -109,7 +109,13 @@ class GameScene extends Phaser.Scene
         if (!this.isGameOver) {
             this.isGameOver = true;
 
-            this.screenTransition.onLevelClose(() => { this.startLevel(won ? this.currentLevelNumber+1 : this.currentLevelNumber) }, this);
+            this.screenTransition.onLevelClose(() => {
+                if (won && this.currentLevelNumber == this.maxLevelNumber) {
+                    TimeManager.endTime = new Date();
+                    new EndScreen(this);
+                }
+                else this.startLevel(won ? this.currentLevelNumber+1 : this.currentLevelNumber) 
+            }, this);
         }
     }
 
